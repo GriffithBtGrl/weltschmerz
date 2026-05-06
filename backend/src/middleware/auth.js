@@ -22,4 +22,16 @@ const optionalAuth = (req, res, next) => {
   next();
 };
 
-module.exports = { requireAuth, optionalAuth };
+const requireAdmin = (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) throw new AppError('Authentication required', 401);
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    if (req.user.role !== 'admin') throw new AppError('Acceso denegado', 403);
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { requireAuth, optionalAuth, requireAdmin };

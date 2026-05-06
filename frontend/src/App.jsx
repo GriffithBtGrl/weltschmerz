@@ -6,6 +6,7 @@ import CreatePost from './pages/CreatePost';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import PostDetail from './pages/PostDetail';
+import Admin from './pages/Admin';
 
 const App = () => {
   return (
@@ -30,6 +31,7 @@ const App = () => {
           <Route path="/login"    element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/post/:id" element={<PostDetail />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
     </BrowserRouter>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
 import Button from '../ui/Button';
 import { Menu, X } from 'lucide-react';
+import Badge from '../ui/Badge';
 
 const BOARDS = ['tech', 'art', 'random', 'feels'];
 
@@ -42,6 +43,11 @@ const Navbar = () => {
         <div className="flex items-center gap-2">
           {user ? (
             <>
+              {user?.role === 'admin' && (
+                <Link to="/admin">
+                  <Badge variant="magenta">admin</Badge>
+                </Link>
+              )}
               <span className="font-mono text-xs text-gray-400 hidden sm:block">
                 {user.username}
               </span>
