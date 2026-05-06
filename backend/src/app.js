@@ -34,6 +34,7 @@ app.use('/api/posts/:postId/comments', require('./routes/comments'));
 app.use('/api/votes', require('./routes/votes'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/users', require('./routes/users'));
 
 app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
 app.use(errorHandler);

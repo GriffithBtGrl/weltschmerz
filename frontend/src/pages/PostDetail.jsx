@@ -37,6 +37,15 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
     }
   };
 
+  const handleLike = async () => {
+    try {
+      await votesApi.vote('comment', comment.id, 1);
+      setTimeout(() => onReplyCreated(), 300);
+    } catch {
+      toast.error('Error al dar like');
+    }
+  }
+
   const borderColors = [
     'border-neon-blue/40',
     'border-neon-magenta/40',
@@ -45,6 +54,8 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
     'border-purple-500/40',
     'border-orange-500/40',
   ];
+
+
 
   return (
     <div className={`border-l-2 pl-3 ${borderColors[depth % borderColors.length]}`}>
@@ -66,11 +77,12 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
 
       {/* Acciones */}
       <div className="flex items-center gap-3 mb-2">
-        <span className={`font-mono text-xs ${comment.vote_score > 0 ? 'text-neon-blue' :
-          comment.vote_score < 0 ? 'text-neon-magenta' : 'text-gray-600'
-          }`}>
-          {comment.vote_score} pts
-        </span>
+        <button
+          onClick={handleLike}
+          className="flex items-center gap-1 font-mono text-xs text-gray-600 hover:text-neon-blue transition-colors"
+        >
+          ▲ {comment.upvotes || 0}
+        </button>
         {depth < 6 && (
           <button
             onClick={() => setReplying(!replying)}
@@ -80,7 +92,6 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
           </button>
         )}
       </div>
-
       {/* Reply form */}
       {replying && (
         <div className="flex flex-col gap-2 mb-3">

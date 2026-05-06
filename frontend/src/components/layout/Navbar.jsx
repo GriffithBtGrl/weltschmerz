@@ -48,9 +48,9 @@ const Navbar = () => {
                   <Badge variant="magenta">admin</Badge>
                 </Link>
               )}
-              <span className="font-mono text-xs text-gray-400 hidden sm:block">
+              <Link to={`/user/${user.username}`} className="font-mono text-xs text-gray-400 hidden sm:block hover:text-neon-blue transition-colors">
                 {user.username}
-              </span>
+              </Link>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 salir
               </Button>

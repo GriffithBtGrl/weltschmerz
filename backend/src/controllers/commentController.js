@@ -8,7 +8,7 @@ const getComments = async (req, res, next) => {
 
     const result = await query(
       `SELECT 
-        c.id, c.parent_id, c.content, c.vote_score, c.depth, c.created_at, c.anonymous_id,
+        c.id, c.parent_id, c.content, c.vote_score, c.upvotes, c.depth, c.created_at, c.anonymous_id,
         u.username, u.avatar_url
        FROM comments c
        LEFT JOIN users u ON c.user_id = u.id
