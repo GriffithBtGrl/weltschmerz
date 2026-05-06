@@ -62,7 +62,7 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
       </div>
 
       {/* Contenido */}
-      <p className="text-gray-300 text-sm mb-2">{comment.content}</p>
+      <p className="text-gray-300 text-sm mb-2 whitespace-pre-wrap">{comment.content}</p>
 
       {/* Acciones */}
       <div className="flex items-center gap-3 mb-2">
@@ -219,7 +219,7 @@ const PostDetail = () => {
             <h1 className="font-mono text-lg text-gray-100 mb-3">{currentPost.title}</h1>
 
             {currentPost.content && (
-              <p className="text-gray-300 text-sm leading-relaxed mb-3">{currentPost.content}</p>
+              <p className="text-gray-300 text-sm leading-relaxed mb-3 whitespace-pre-wrap">{currentPost.content}</p>
             )}
 
             {currentPost.image_url && (

@@ -4,8 +4,8 @@ const { generateAnonId } = require('../utils/generateAnonId');
 
 const vote = async (req, res, next) => {
   try {
-    const { type, id } = req.params; // type: 'post' o 'comment'
-    const { value } = req.body;      // 1 o -1
+    const { type, id } = req.params;
+    const { value } = req.body;
 
     if (![1, -1].includes(Number(value)))
       throw new AppError('Valor de voto inválido', 400);
@@ -18,48 +18,71 @@ const vote = async (req, res, next) => {
 
     const post_id    = type === 'post'    ? id : null;
     const comment_id = type === 'comment' ? id : null;
+    const table      = type === 'post' ? 'posts' : 'comments';
 
-    // Verificar si ya votó
-    let existingVote;
+    // Buscar voto existente
+    let existingResult;
     if (user_id) {
-      existingVote = await query(
-        `SELECT id, value FROM votes WHERE user_id = $1 AND ${type}_id = $2`,
+      existingResult = await query(
+        `SELECT id, value FROM votes 
+         WHERE user_id = $1 AND ${type}_id = $2`,
         [user_id, id]
       );
     } else {
-      existingVote = await query(
-        `SELECT id, value FROM votes WHERE anonymous_id = $1 AND ${type}_id = $2`,
+      existingResult = await query(
+        `SELECT id, value FROM votes 
+         WHERE anonymous_id = $1 AND ${type}_id = $2`,
         [anonymous_id, id]
       );
     }
 
-    const table = type === 'post' ? 'posts' : 'comments';
+    const existing = existingResult.rows[0];
 
-    if (existingVote.rows.length > 0) {
-      const existing = existingVote.rows[0];
-
+    if (existing) {
       if (existing.value === Number(value)) {
-        // Mismo voto = quitar voto
+        // Mismo voto → quitar voto
         await query('DELETE FROM votes WHERE id = $1', [existing.id]);
-        await query(`UPDATE ${table} SET vote_score = vote_score - $1 WHERE id = $2`, [value, id]);
-        return res.json({ message: 'Voto eliminado', vote_score: null });
+        await query(
+          `UPDATE ${table} SET vote_score = vote_score - $1 WHERE id = $2`,
+          [value, id]
+        );
+        return res.json({ action: 'removed', vote_score: null });
       } else {
-        // Voto diferente = cambiar voto
+        // Voto diferente → cambiar voto (suma doble para compensar)
         await query('UPDATE votes SET value = $1 WHERE id = $2', [value, existing.id]);
-        await query(`UPDATE ${table} SET vote_score = vote_score + $1 WHERE id = $2`, [value * 2, id]);
-        return res.json({ message: 'Voto actualizado' });
+        await query(
+          `UPDATE ${table} SET vote_score = vote_score + $1 WHERE id = $2`,
+          [Number(value) * 2, id]
+        );
+        return res.json({ action: 'changed' });
       }
     }
 
-    // Voto nuevo
+    // Voto nuevo — verificar constraint único para usuarios registrados
+    if (user_id) {
+      const constraint = type === 'post'
+        ? 'AND post_id = $3'
+        : 'AND comment_id = $3';
+
+      const duplicate = await query(
+        `SELECT id FROM votes WHERE user_id = $1 ${constraint}`,
+        [user_id, id]
+      );
+      if (duplicate.rows.length > 0)
+        throw new AppError('Ya votaste en esto', 409);
+    }
+
     await query(
       `INSERT INTO votes (user_id, anonymous_id, post_id, comment_id, value)
        VALUES ($1, $2, $3, $4, $5)`,
       [user_id, anonymous_id, post_id, comment_id, value]
     );
-    await query(`UPDATE ${table} SET vote_score = vote_score + $1 WHERE id = $2`, [value, id]);
+    await query(
+      `UPDATE ${table} SET vote_score = vote_score + $1 WHERE id = $2`,
+      [value, id]
+    );
 
-    res.status(201).json({ message: 'Voto registrado' });
+    res.status(201).json({ action: 'added' });
   } catch (err) {
     next(err);
   }
