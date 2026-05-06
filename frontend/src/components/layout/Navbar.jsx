@@ -5,7 +5,7 @@ import Button from '../ui/Button';
 import { Menu, X } from 'lucide-react';
 import Badge from '../ui/Badge';
 
-const BOARDS = ['tech', 'art', 'random', 'feels'];
+const BOARDS = ['tech', 'art', 'random', 'feels', 'anime', 'gaming', 'music', 'memes'];
 
 const Navbar = () => {
   const { user, logout } = useAuthStore();
