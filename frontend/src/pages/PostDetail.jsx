@@ -66,10 +66,9 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
 
       {/* Acciones */}
       <div className="flex items-center gap-3 mb-2">
-        <span className={`font-mono text-xs ${
-          comment.vote_score > 0 ? 'text-neon-blue' :
+        <span className={`font-mono text-xs ${comment.vote_score > 0 ? 'text-neon-blue' :
           comment.vote_score < 0 ? 'text-neon-magenta' : 'text-gray-600'
-        }`}>
+          }`}>
           {comment.vote_score} pts
         </span>
         {depth < 6 && (
@@ -144,7 +143,13 @@ const PostDetail = () => {
   const handleVote = async (value) => {
     try {
       await votesApi.vote('post', id, value);
-      updateVoteScore(id, value);
+      usePostStore.setState((state) => ({
+        currentPost: state.currentPost ? {
+          ...state.currentPost,
+          upvotes: value === 1 ? (state.currentPost.upvotes || 0) + 1 : state.currentPost.upvotes,
+          downvotes: value === -1 ? (state.currentPost.downvotes || 0) + 1 : state.currentPost.downvotes,
+        } : null,
+      }));
     } catch {
       toast.error('Error al votar');
     }
@@ -189,18 +194,18 @@ const PostDetail = () => {
       <div className="bg-dark-800 border border-dark-600 rounded-lg p-5 mb-6">
         <div className="flex gap-4">
           {/* Votos */}
-          <div className="flex flex-col items-center gap-1">
-            <button onClick={() => handleVote(1)} className="text-gray-600 hover:text-neon-blue transition-colors">
-              <ArrowUp size={20} />
+          <div className="flex items-center gap-4 mb-4">
+            <button
+              onClick={() => handleVote(1)}
+              className="flex items-center gap-1 font-mono text-sm text-neon-blue hover:text-neon-blue/70 transition-colors"
+            >
+              <ArrowUp size={16} /> {currentPost.upvotes || 0}
             </button>
-            <span className={`font-mono text-sm font-bold ${
-              currentPost.vote_score > 0 ? 'text-neon-blue' :
-              currentPost.vote_score < 0 ? 'text-neon-magenta' : 'text-gray-500'
-            }`}>
-              {currentPost.vote_score}
-            </span>
-            <button onClick={() => handleVote(-1)} className="text-gray-600 hover:text-neon-magenta transition-colors">
-              <ArrowDown size={20} />
+            <button
+              onClick={() => handleVote(-1)}
+              className="flex items-center gap-1 font-mono text-sm text-neon-magenta hover:text-neon-magenta/70 transition-colors"
+            >
+              <ArrowDown size={16} /> -{currentPost.downvotes || 0}
             </button>
           </div>
 

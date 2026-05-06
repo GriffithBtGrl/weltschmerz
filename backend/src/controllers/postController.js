@@ -38,7 +38,7 @@ const getPost = async (req, res, next) => {
     const { id } = req.params;
     const result = await query(
       `SELECT 
-        p.id, p.title, p.content, p.image_url, p.vote_score, p.comment_count,
+        p.id, p.title, p.content, p.image_url, p.vote_score, p.upvotes, p.downvotes, p.comment_count,
         p.is_pinned, p.created_at, p.anonymous_id,
         b.slug as board_slug, b.name as board_name,
         u.username, u.avatar_url

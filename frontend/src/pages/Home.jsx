@@ -14,23 +14,18 @@ const PostCard = ({ post, onVote }) => {
     <div className="bg-dark-800 border border-dark-600 rounded-lg p-4 hover:border-neon-blue/30 transition-all duration-200">
       <div className="flex gap-3">
         {/* Votos */}
-        <div className="flex flex-col items-center gap-1 min-w-[40px]">
+        <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={() => onVote(post.id, 1)}
-            className="text-gray-600 hover:text-neon-blue transition-colors"
+            className="flex items-center gap-1 text-neon-blue hover:text-neon-blue/70 transition-colors font-mono text-xs"
           >
-            <ArrowUp size={18} />
+            <ArrowUp size={14} /> {post.upvotes || 0}
           </button>
-          <span className={`font-mono text-sm font-bold ${post.vote_score > 0 ? 'text-neon-blue' :
-              post.vote_score < 0 ? 'text-neon-magenta' : 'text-gray-500'
-            }`}>
-            {post.vote_score}
-          </span>
           <button
             onClick={() => onVote(post.id, -1)}
-            className="text-gray-600 hover:text-neon-magenta transition-colors"
+            className="flex items-center gap-1 text-neon-magenta hover:text-neon-magenta/70 transition-colors font-mono text-xs"
           >
-            <ArrowDown size={18} />
+            <ArrowDown size={14} /> -{post.downvotes || 0}
           </button>
         </div>
 
@@ -93,7 +88,17 @@ const Home = () => {
   const handleVote = async (postId, value) => {
     try {
       await votesApi.vote('post', postId, value);
-      updateVoteScore(postId, value);
+      // Actualizar upvotes/downvotes localmente
+      usePostStore.setState((state) => ({
+        posts: state.posts.map((p) => {
+          if (p.id !== postId) return p;
+          return {
+            ...p,
+            upvotes: value === 1 ? (p.upvotes || 0) + 1 : p.upvotes,
+            downvotes: value === -1 ? (p.downvotes || 0) + 1 : p.downvotes,
+          };
+        }),
+      }));
     } catch {
       toast.error('Error al votar');
     }
@@ -120,8 +125,8 @@ const Home = () => {
           <button
             onClick={() => handleSort('new')}
             className={`flex items-center gap-1 px-3 py-1.5 rounded font-mono text-xs border transition-all ${sort === 'new'
-                ? 'border-neon-blue text-neon-blue bg-neon-blue/10'
-                : 'border-dark-600 text-gray-500 hover:border-gray-500'
+              ? 'border-neon-blue text-neon-blue bg-neon-blue/10'
+              : 'border-dark-600 text-gray-500 hover:border-gray-500'
               }`}
           >
             <Clock size={12} /> nuevo
@@ -129,8 +134,8 @@ const Home = () => {
           <button
             onClick={() => handleSort('popular')}
             className={`flex items-center gap-1 px-3 py-1.5 rounded font-mono text-xs border transition-all ${sort === 'popular'
-                ? 'border-neon-magenta text-neon-magenta bg-neon-magenta/10'
-                : 'border-dark-600 text-gray-500 hover:border-gray-500'
+              ? 'border-neon-magenta text-neon-magenta bg-neon-magenta/10'
+              : 'border-dark-600 text-gray-500 hover:border-gray-500'
               }`}
           >
             <Flame size={12} /> popular
