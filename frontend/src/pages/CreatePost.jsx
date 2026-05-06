@@ -9,7 +9,7 @@ import { uploadApi } from '../services/api';
 import toast from 'react-hot-toast';
 import { ImagePlus, X } from 'lucide-react';
 
-const BOARDS = ['tech', 'art', 'random', 'feels'];
+const BOARDS = ['random','anime', 'tech', 'gaming', 'music', 'memes', 'feels', 'art'];
 
 const CreatePost = () => {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
