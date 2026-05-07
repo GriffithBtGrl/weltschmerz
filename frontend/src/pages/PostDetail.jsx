@@ -56,20 +56,20 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
   ];
 
 
-
   return (
     <div className={`border-l-2 pl-3 ${borderColors[depth % borderColors.length]}`}>
       {/* Header */}
-      <div className="flex items-center gap-2 mb-1">
+      <div className="flex items-center gap-2 mb-1 flex-wrap">
+        {comment.avatar_url && (
+          <img src={comment.avatar_url} alt="" className="w-4 h-4 rounded-full object-cover border border-dark-600" />
+        )}
         <span className="font-mono text-xs text-neon-blue">
           {comment.username || comment.anonymous_id || 'anónimo'}
         </span>
+        {comment.role === 'admin' && <Badge variant="magenta">admin</Badge>}
         <span className="font-mono text-xs text-gray-600">
           {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: es })}
         </span>
-        {comment.depth > 0 && (
-          <span className="font-mono text-xs text-gray-700">depth:{comment.depth}</span>
-        )}
       </div>
 
       {/* Contenido */}
@@ -79,9 +79,12 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
       <div className="flex items-center gap-3 mb-2">
         <button
           onClick={handleLike}
-          className="flex items-center gap-1 font-mono text-xs text-gray-600 hover:text-neon-blue transition-colors"
+          className="flex items-center gap-1 font-mono text-xs transition-colors text-gray-600 hover:text-neon-blue"
         >
-          ▲ {comment.upvotes || 0}
+          <ArrowUp size={16} className={comment.upvotes > 0 ? 'text-neon-blue' : ''} />
+          <span className={comment.upvotes > 0 ? 'text-neon-blue' : ''}>
+            {comment.upvotes || 0}
+          </span>
         </button>
         {depth < 6 && (
           <button
@@ -203,56 +206,56 @@ const PostDetail = () => {
 
       {/* Post */}
       <div className="bg-dark-800 border border-dark-600 rounded-lg p-5 mb-6">
-        <div className="flex gap-4">
-          {/* Votos */}
-          <div className="flex items-center gap-4 mb-4">
-            <button
-              onClick={() => handleVote(1)}
-              className="flex items-center gap-1 font-mono text-sm text-neon-blue hover:text-neon-blue/70 transition-colors"
-            >
-              <ArrowUp size={16} /> {currentPost.upvotes || 0}
-            </button>
-            <button
-              onClick={() => handleVote(-1)}
-              className="flex items-center gap-1 font-mono text-sm text-neon-magenta hover:text-neon-magenta/70 transition-colors"
-            >
-              <ArrowDown size={16} /> -{currentPost.downvotes || 0}
-            </button>
+        <div className="flex flex-col gap-3">
+          {/* Header */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {currentPost.avatar_url ? (
+              <img src={currentPost.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover border border-dark-600" />
+            ) : (
+              <div className="w-7 h-7 rounded-full bg-dark-700 border border-dark-600 flex items-center justify-center font-mono text-xs text-neon-blue">
+                {(currentPost.username || '?')[0].toUpperCase()}
+              </div>
+            )}
+            <Badge variant="blue">/{currentPost.board_slug}/</Badge>
+            <span className="font-mono text-xs text-gray-500">
+              {currentPost.username || currentPost.anonymous_id || 'anónimo'}
+            </span>
+            {currentPost.role === 'admin' && <Badge variant="magenta">admin</Badge>}
+            <span className="font-mono text-xs text-gray-600">
+              {formatDistanceToNow(new Date(currentPost.created_at), { addSuffix: true, locale: es })}
+            </span>
           </div>
 
+          
+
+          {/* Título */}
+          <h1 className="font-mono text-lg text-gray-100">{currentPost.title}</h1>
+
           {/* Contenido */}
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <Badge variant="blue">/{currentPost.board_slug}/</Badge>
-              <span className="font-mono text-xs text-gray-500">
-                {currentPost.username || currentPost.anonymous_id || 'anónimo'}
-              </span>
-              <span className="font-mono text-xs text-gray-600">
-                {formatDistanceToNow(new Date(currentPost.created_at), { addSuffix: true, locale: es })}
-              </span>
-            </div>
+          {currentPost.content && (
+            <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{currentPost.content}</p>
+          )}
 
-            <h1 className="font-mono text-lg text-gray-100 mb-3">{currentPost.title}</h1>
+          {currentPost.image_url && (
+            <img src={currentPost.image_url} alt="" className="rounded border border-dark-600 max-w-full" />
+          )}
 
-            {currentPost.content && (
-              <p className="text-gray-300 text-sm leading-relaxed mb-3 whitespace-pre-wrap">{currentPost.content}</p>
-            )}
-
-            {currentPost.image_url && (
-              <img
-                src={currentPost.image_url}
-                alt=""
-                className="rounded border border-dark-600 max-w-full"
-              />
-            )}
-
-            <div className="flex items-center gap-1 mt-3 font-mono text-xs text-gray-600">
-              <MessageSquare size={13} />
-              {currentPost.comment_count} comentarios
-            </div>
+          <div className="flex items-center gap-1 font-mono text-xs text-gray-600">
+            <MessageSquare size={13} />
+            {currentPost.comment_count} comentarios
           </div>
         </div>
       </div>
+
+      {/* Votos */}
+          <div className="flex items-center gap-4">
+            <button onClick={() => handleVote(1)} className="flex items-center gap-1 font-mono text-sm text-neon-blue hover:text-neon-blue/70 transition-colors">
+              <ArrowUp size={16} /> {currentPost.upvotes || 0}
+            </button>
+            <button onClick={() => handleVote(-1)} className="flex items-center gap-1 font-mono text-sm text-neon-magenta hover:text-neon-magenta/70 transition-colors">
+              <ArrowDown size={16} /> -{currentPost.downvotes || 0}
+            </button>
+          </div>
 
       {/* Nuevo comentario */}
       <div className="bg-dark-800 border border-dark-600 rounded-lg p-4 mb-6">

@@ -17,7 +17,7 @@ const getPosts = async (req, res, next) => {
         p.id, p.title, p.content, p.image_url, p.vote_score, p.upvotes, p.downvotes, p.comment_count,
         p.is_pinned, p.created_at, p.anonymous_id,
         b.slug as board_slug, b.name as board_name,
-        u.username, u.avatar_url
+        u.username, u.avatar_url, u.role
        FROM posts p
        JOIN boards b ON p.board_id = b.id
        LEFT JOIN users u ON p.user_id = u.id
@@ -41,7 +41,7 @@ const getPost = async (req, res, next) => {
         p.id, p.title, p.content, p.image_url, p.vote_score, p.upvotes, p.downvotes, p.comment_count,
         p.is_pinned, p.created_at, p.anonymous_id,
         b.slug as board_slug, b.name as board_name,
-        u.username, u.avatar_url
+        u.username, u.avatar_url, u.role
        FROM posts p
        JOIN boards b ON p.board_id = b.id
        LEFT JOIN users u ON p.user_id = u.id

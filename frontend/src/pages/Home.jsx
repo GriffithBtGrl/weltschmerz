@@ -12,9 +12,49 @@ import toast from 'react-hot-toast';
 const PostCard = ({ post, onVote }) => {
   return (
     <div className="bg-dark-800 border border-dark-600 rounded-lg p-4 hover:border-neon-blue/30 transition-all duration-200">
-      <div className="flex gap-3">
+      <div className="flex flex-col gap-2">
+        {/* Header: avatar + username + badge + tiempo */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {post.avatar_url ? (
+            <img src={post.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover border border-dark-600" />
+          ) : (
+            <div className="w-7 h-7 rounded-full bg-dark-700 border border-dark-600 flex items-center justify-center font-mono text-xs text-neon-blue">
+              {(post.username || '?')[0].toUpperCase()}
+            </div>
+          )}
+          <Badge variant="blue">/{post.board_slug}/</Badge>
+          <span className="font-mono text-xs text-gray-500">
+            {post.username || post.anonymous_id || 'anónimo'}
+          </span>
+          {post.role === 'admin' && <Badge variant="magenta">admin</Badge>}
+          <span className="font-mono text-xs text-gray-600">
+            {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: es })}
+          </span>
+        </div>
+
+        
+
+        {/* Título y contenido */}
+        <div>
+          <Link to={`/post/${post.id}`}>
+            <h2 className="font-mono text-gray-200 hover:text-neon-blue transition-colors cursor-pointer">
+              {post.title}
+            </h2>
+          </Link>
+          {post.content && (
+            <p className="text-gray-500 text-sm mt-1 line-clamp-2">{post.content}</p>
+          )}
+          {post.image_url && (
+            <img
+              src={post.image_url}
+              alt=""
+              className="mt-2 rounded max-h-48 object-cover border border-dark-600"
+            />
+          )}
+        </div>
+
         {/* Votos */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => onVote(post.id, 1)}
             className="flex items-center gap-1 text-neon-blue hover:text-neon-blue/70 transition-colors font-mono text-xs"
@@ -29,45 +69,15 @@ const PostCard = ({ post, onVote }) => {
           </button>
         </div>
 
-        {/* Contenido */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <Badge variant="blue">/{post.board_slug}/</Badge>
-            <span className="font-mono text-xs text-gray-500">
-              {post.username || post.anonymous_id || 'anónimo'}
-            </span>
-            <span className="font-mono text-xs text-gray-600">
-              {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: es })}
-            </span>
-          </div>
-
-          <Link to={`/post/${post.id}`}>
-            <h2 className="font-mono text-gray-200 hover:text-neon-blue transition-colors cursor-pointer truncate">
-              {post.title}
-            </h2>
+        {/* Footer */}
+        <div className="flex items-center gap-3">
+          <Link
+            to={`/post/${post.id}`}
+            className="flex items-center gap-1 text-xs font-mono text-gray-500 hover:text-neon-blue transition-colors"
+          >
+            <MessageSquare size={13} />
+            {post.comment_count} comentarios
           </Link>
-
-          {post.content && (
-            <p className="text-gray-500 text-sm mt-1 line-clamp-2">{post.content}</p>
-          )}
-
-          {post.image_url && (
-            <img
-              src={post.image_url}
-              alt=""
-              className="mt-2 rounded max-h-48 object-cover border border-dark-600"
-            />
-          )}
-
-          <div className="flex items-center gap-3 mt-3">
-            <Link
-              to={`/post/${post.id}`}
-              className="flex items-center gap-1 text-xs font-mono text-gray-500 hover:text-neon-blue transition-colors"
-            >
-              <MessageSquare size={13} />
-              {post.comment_count} comentarios
-            </Link>
-          </div>
         </div>
       </div>
     </div>
