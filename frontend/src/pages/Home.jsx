@@ -23,16 +23,22 @@ const PostCard = ({ post, onVote }) => {
             </div>
           )}
           <Badge variant="blue">/{post.board_slug}/</Badge>
-          <span className="font-mono text-xs text-gray-500">
-            {post.username || post.anonymous_id || 'anónimo'}
-          </span>
+          {post.username ? (
+            <Link to={`/user/${post.username}`} className="font-mono text-xs text-gray-500 hover:text-neon-blue transition-colors">
+              {post.username}
+            </Link>
+          ) : (
+            <span className="font-mono text-xs text-gray-500">
+              {post.anonymous_id || 'anónimo'}
+            </span>
+          )}
           {post.role === 'admin' && <Badge variant="magenta">admin</Badge>}
           <span className="font-mono text-xs text-gray-600">
             {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: es })}
           </span>
         </div>
 
-        
+
 
         {/* Título y contenido */}
         <div>

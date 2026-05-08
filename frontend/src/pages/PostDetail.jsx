@@ -63,9 +63,15 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
         {comment.avatar_url && (
           <img src={comment.avatar_url} alt="" className="w-4 h-4 rounded-full object-cover border border-dark-600" />
         )}
-        <span className="font-mono text-xs text-neon-blue">
-          {comment.username || comment.anonymous_id || 'anónimo'}
-        </span>
+        {comment.username ? (
+          <Link to={`/user/${comment.username}`} className="font-mono text-xs text-neon-blue hover:text-neon-blue/70 transition-colors">
+            {comment.username}
+          </Link>
+        ) : (
+          <span className="font-mono text-xs text-neon-blue">
+            {comment.anonymous_id || 'anónimo'}
+          </span>
+        )}
         {comment.role === 'admin' && <Badge variant="magenta">admin</Badge>}
         <span className="font-mono text-xs text-gray-600">
           {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: es })}
@@ -217,16 +223,22 @@ const PostDetail = () => {
               </div>
             )}
             <Badge variant="blue">/{currentPost.board_slug}/</Badge>
-            <span className="font-mono text-xs text-gray-500">
-              {currentPost.username || currentPost.anonymous_id || 'anónimo'}
-            </span>
+            {currentPost.username ? (
+              <Link to={`/user/${currentPost.username}`} className="font-mono text-xs text-gray-500 hover:text-neon-blue transition-colors">
+                {currentPost.username}
+              </Link>
+            ) : (
+              <span className="font-mono text-xs text-gray-500">
+                {currentPost.anonymous_id || 'anónimo'}
+              </span>
+            )}
             {currentPost.role === 'admin' && <Badge variant="magenta">admin</Badge>}
             <span className="font-mono text-xs text-gray-600">
               {formatDistanceToNow(new Date(currentPost.created_at), { addSuffix: true, locale: es })}
             </span>
           </div>
 
-          
+
 
           {/* Título */}
           <h1 className="font-mono text-lg text-gray-100">{currentPost.title}</h1>
@@ -248,14 +260,14 @@ const PostDetail = () => {
       </div>
 
       {/* Votos */}
-          <div className="flex items-center gap-4">
-            <button onClick={() => handleVote(1)} className="flex items-center gap-1 font-mono text-sm text-neon-blue hover:text-neon-blue/70 transition-colors">
-              <ArrowUp size={16} /> {currentPost.upvotes || 0}
-            </button>
-            <button onClick={() => handleVote(-1)} className="flex items-center gap-1 font-mono text-sm text-neon-magenta hover:text-neon-magenta/70 transition-colors">
-              <ArrowDown size={16} /> -{currentPost.downvotes || 0}
-            </button>
-          </div>
+      <div className="flex items-center gap-4">
+        <button onClick={() => handleVote(1)} className="flex items-center gap-1 font-mono text-sm text-neon-blue hover:text-neon-blue/70 transition-colors">
+          <ArrowUp size={16} /> {currentPost.upvotes || 0}
+        </button>
+        <button onClick={() => handleVote(-1)} className="flex items-center gap-1 font-mono text-sm text-neon-magenta hover:text-neon-magenta/70 transition-colors">
+          <ArrowDown size={16} /> -{currentPost.downvotes || 0}
+        </button>
+      </div>
 
       {/* Nuevo comentario */}
       <div className="bg-dark-800 border border-dark-600 rounded-lg p-4 mb-6">
