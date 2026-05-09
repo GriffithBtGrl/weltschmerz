@@ -66,6 +66,24 @@ router.get('/users', requireAdmin, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// Comentarios con info de autor y post
+router.get('/comments', requireAdmin, async (req, res, next) => {
+  try {
+    const result = await query(
+      `SELECT c.id, c.content, c.vote_score, c.upvotes, c.created_at,
+              c.anonymous_id, c.depth,
+              p.title as post_title, p.id as post_id,
+              u.username, u.email
+       FROM comments c
+       LEFT JOIN users u ON c.user_id = u.id
+       JOIN posts p ON c.post_id = p.id
+       ORDER BY c.created_at DESC
+       LIMIT 100`
+    );
+    res.json(result.rows);
+  } catch (err) { next(err); }
+});
+
 // Eliminar cualquier comentario
 router.delete('/comments/:id', requireAdmin, async (req, res, next) => {
   try {

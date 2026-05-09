@@ -75,4 +75,15 @@ export const usersApi = {
   },
 };
 
+// Admin
+export const adminApi = {
+  getStats: () => api.get("/admin/stats"),
+  getPosts: () => api.get("/admin/posts"),
+  getUsers: () => api.get("/admin/users"),
+  getComments: () => api.get("/admin/comments"),
+  deletePost: (id) => api.delete(`/admin/posts/${id}`),
+  deleteComment: (id) => api.delete(`/admin/comments/${id}`),
+  pinPost: (id) => api.patch(`/admin/posts/${id}/pin`),
+};
+
 export default api;
