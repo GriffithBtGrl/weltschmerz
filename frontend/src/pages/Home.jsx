@@ -63,15 +63,17 @@ const PostCard = ({ post, onVote }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => onVote(post.id, 1)}
-            className="flex items-center gap-1 text-neon-blue hover:text-neon-blue/70 transition-colors font-mono text-xs"
+            className={`flex items-center gap-1 transition-colors font-mono text-xs
+      ${post.user_vote === 1 ? 'text-neon-blue' : 'text-gray-600 hover:text-neon-blue'}`}
           >
             <ArrowUp size={14} /> {post.upvotes || 0}
           </button>
           <button
             onClick={() => onVote(post.id, -1)}
-            className="flex items-center gap-1 text-neon-magenta hover:text-neon-magenta/70 transition-colors font-mono text-xs"
+            className={`flex items-center gap-1 transition-colors font-mono text-xs
+      ${post.user_vote === -1 ? 'text-neon-magenta' : 'text-gray-600 hover:text-neon-magenta'}`}
           >
-            <ArrowDown size={14} /> -{post.downvotes || 0}
+            <ArrowDown size={14} /> {post.downvotes || 0}
           </button>
         </div>
 
@@ -104,14 +106,20 @@ const Home = () => {
   const handleVote = async (postId, value) => {
     try {
       await votesApi.vote('post', postId, value);
-      // Actualizar upvotes/downvotes localmente
       usePostStore.setState((state) => ({
         posts: state.posts.map((p) => {
           if (p.id !== postId) return p;
+          const prevVote = p.user_vote;
+          const removing = prevVote === value;
           return {
             ...p,
-            upvotes: value === 1 ? (p.upvotes || 0) + 1 : p.upvotes,
-            downvotes: value === -1 ? (p.downvotes || 0) + 1 : p.downvotes,
+            user_vote: removing ? null : value,
+            upvotes: value === 1
+              ? removing ? (p.upvotes || 0) - 1 : (p.upvotes || 0) + 1
+              : prevVote === 1 ? (p.upvotes || 0) - 1 : p.upvotes,
+            downvotes: value === -1
+              ? removing ? (p.downvotes || 0) - 1 : (p.downvotes || 0) + 1
+              : prevVote === -1 ? (p.downvotes || 0) - 1 : p.downvotes,
           };
         }),
       }));

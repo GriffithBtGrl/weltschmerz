@@ -261,10 +261,26 @@ const PostDetail = () => {
 
       {/* Votos */}
       <div className="flex items-center gap-4">
-        <button onClick={() => handleVote(1)} className="flex items-center gap-1 font-mono text-sm text-neon-blue hover:text-neon-blue/70 transition-colors">
+        <button
+          onClick={() => handleVote(1)}
+          disabled={currentPost.user_vote === 1}
+          className={`flex items-center gap-1 font-mono text-sm transition-colors
+      ${currentPost.user_vote === 1
+              ? 'text-neon-blue cursor-not-allowed'
+              : 'text-gray-600 hover:text-neon-blue'
+            }`}
+        >
           <ArrowUp size={16} /> {currentPost.upvotes || 0}
         </button>
-        <button onClick={() => handleVote(-1)} className="flex items-center gap-1 font-mono text-sm text-neon-magenta hover:text-neon-magenta/70 transition-colors">
+        <button
+          onClick={() => handleVote(-1)}
+          disabled={currentPost.user_vote === -1}
+          className={`flex items-center gap-1 font-mono text-sm transition-colors
+      ${currentPost.user_vote === -1
+              ? 'text-neon-magenta cursor-not-allowed'
+              : 'text-gray-600 hover:text-neon-magenta'
+            }`}
+        >
           <ArrowDown size={16} /> -{currentPost.downvotes || 0}
         </button>
       </div>
