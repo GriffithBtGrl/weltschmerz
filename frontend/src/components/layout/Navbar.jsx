@@ -5,7 +5,7 @@ import Button from '../ui/Button';
 import { Menu, X } from 'lucide-react';
 import Badge from '../ui/Badge';
 
-const BOARDS = ['random','anime', 'tech', 'gaming', 'music', 'memes', 'feels', 'art'];
+const BOARDS = ['random', 'anime', 'tech', 'gaming', 'music', 'memes', 'feels', 'art'];
 
 const Navbar = () => {
   const { user, logout } = useAuthStore();
@@ -48,8 +48,17 @@ const Navbar = () => {
                   <Badge variant="magenta">admin</Badge>
                 </Link>
               )}
-              <Link to={`/user/${user.username}`} className="font-mono text-xs text-gray-400 hidden sm:block hover:text-neon-blue transition-colors">
-                {user.username}
+              <Link to={`/user/${user.username}`} className="flex items-center gap-1.5 group transition-colors">
+                {user.avatar_url ? (
+                  <img src={user.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover border border-dark-600 group-hover:border-neon-blue transition-colors" />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-dark-700 border border-dark-600 group-hover:border-neon-blue flex items-center justify-center font-mono text-xs text-neon-blue transition-colors">
+                    {user.username[0].toUpperCase()}
+                  </div>
+                )}
+                <span className="font-mono text-xs text-gray-400 group-hover:text-neon-blue transition-colors">
+                  {user.username}
+                </span>
               </Link>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 salir
