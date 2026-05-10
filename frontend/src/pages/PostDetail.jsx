@@ -292,7 +292,7 @@ const PostDetail = () => {
         </h3>
         <Textarea
           placeholder="Escribe algo... puedes ser anónimo."
-          rows={4}
+          rows={3}
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
         />

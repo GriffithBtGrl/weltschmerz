@@ -171,24 +171,32 @@ const Profile = () => {
             {posts.length === 0 ? (
                 <p className="font-mono text-sm text-gray-600">no hay posts todavía.</p>
             ) : (
-                <div className="flex flex-col gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {posts.map((post) => (
-                        <div key={post.id} className="bg-dark-800 border border-dark-600 rounded-lg p-4 hover:border-neon-blue/30 transition-all">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <Badge variant="blue">/{post.board_slug}/</Badge>
-                                <span className="font-mono text-xs text-gray-600">
-                                    {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: es })}
-                                </span>
-                            </div>
-                            <Link to={`/post/${post.id}`}>
-                                <h3 className="font-mono text-sm text-gray-200 hover:text-neon-blue transition-colors">
-                                    {post.title}
-                                </h3>
-                            </Link>
-                            <div className="flex items-center gap-3 mt-2 font-mono text-xs text-gray-600">
-                                <span className="flex items-center gap-1 text-neon-blue"><ArrowUp size={12} />{post.upvotes || 0}</span>
-                                <span className="flex items-center gap-1 text-neon-magenta"><ArrowDown size={12} />-{post.downvotes || 0}</span>
-                                <span className="flex items-center gap-1"><MessageSquare size={12} />{post.comment_count}</span>
+                        <div key={post.id} className="bg-dark-800 border border-dark-600 rounded-lg overflow-hidden hover:border-neon-blue/30 transition-all">
+                            {post.image_url && (
+                                <img src={post.image_url} alt="" className="w-full h-48 object-cover border-b border-dark-600" />
+                            )}
+                            <div className="p-4">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                    <Badge variant="blue">/{post.board_slug}/</Badge>
+                                    <span className="font-mono text-xs text-gray-600">
+                                        {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: es })}
+                                    </span>
+                                </div>
+                                <Link to={`/post/${post.id}`}>
+                                    <h3 className="font-mono text-sm text-gray-200 hover:text-neon-blue transition-colors">
+                                        {post.title}
+                                    </h3>
+                                </Link>
+                                {post.content && (
+                                    <p className="text-gray-500 text-xs mt-1 line-clamp-2">{post.content}</p>
+                                )}
+                                <div className="flex items-center gap-3 mt-2 font-mono text-xs text-gray-600">
+                                    <span className="flex items-center gap-1 text-neon-blue"><ArrowUp size={12} />{post.upvotes || 0}</span>
+                                    <span className="flex items-center gap-1 text-neon-magenta"><ArrowDown size={12} />{post.downvotes || 0}</span>
+                                    <span className="flex items-center gap-1"><MessageSquare size={12} />{post.comment_count}</span>
+                                </div>
                             </div>
                         </div>
                     ))}
