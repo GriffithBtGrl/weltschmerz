@@ -89,7 +89,7 @@ const Profile = () => {
         <div className="max-w-3xl mx-auto px-4 py-6">
             {/* Header perfil */}
             <div className="bg-dark-800 border border-dark-600 rounded-lg p-6 mb-6">
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-4 mb-2">
                     {/* Avatar */}
                     <div className="relative shrink-0">
                         <div className="w-16 h-16 rounded-full border-2 border-neon-blue/50 overflow-hidden bg-dark-700">
