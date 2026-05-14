@@ -37,6 +37,7 @@ export const commentsApi = {
   getAll: (postId) => api.get(`/posts/${postId}/comments`),
   create: (postId, data) => api.post(`/posts/${postId}/comments`, data),
   delete: (id) => api.delete(`/comments/${id}`),
+  update: (id, content) => api.patch(`/comments/${id}`, { content }),
 };
 
 // Votes

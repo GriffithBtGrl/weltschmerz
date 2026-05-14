@@ -5,18 +5,25 @@ import { es } from 'date-fns/locale';
 import { ArrowUp, ArrowDown, MessageSquare, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import usePostStore from '../store/postStore';
-import { commentsApi, votesApi } from '../services/api';
+import { commentsApi, votesApi, postsApi } from '../services/api';
+import { Trash2, Edit2, X, Check } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Textarea from '../components/ui/Textarea';
+
+
 
 // Componente recursivo de comentario
 const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
   const [replying, setReplying] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState(comment.content);
   const { user } = useAuthStore();
+
+  const isOwner = user && comment.username === user.username;
 
   const handleReply = async () => {
     if (!replyText.trim()) return;
@@ -37,6 +44,29 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!confirm('¿Eliminar este comentario?')) return;
+    try {
+      await commentsApi.delete(comment.id);
+      onReplyCreated();
+      toast.success('Comentario eliminado');
+    } catch {
+      toast.error('Error al eliminar');
+    }
+  };
+
+  const handleEdit = async () => {
+    if (!editText.trim()) return;
+    try {
+      await commentsApi.update(comment.id, editText);
+      setEditing(false);
+      onReplyCreated();
+      toast.success('Comentario editado');
+    } catch {
+      toast.error('Error al editar');
+    }
+  };
+
   const handleLike = async () => {
     try {
       await votesApi.vote('comment', comment.id, 1);
@@ -44,7 +74,7 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
     } catch {
       toast.error('Error al dar like');
     }
-  }
+  };
 
   const borderColors = [
     'border-neon-blue/40',
@@ -55,10 +85,8 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
     'border-orange-500/40',
   ];
 
-
   return (
     <div className={`border-l-2 pl-3 ${borderColors[depth % borderColors.length]}`}>
-      {/* Header */}
       <div className="flex items-center gap-2 mb-1 flex-wrap">
         {comment.avatar_url && (
           <img src={comment.avatar_url} alt="" className="w-4 h-4 rounded-full object-cover border border-dark-600" />
@@ -78,35 +106,73 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
         </span>
       </div>
 
-      {/* Contenido */}
-      <p className="text-gray-300 text-sm mb-2 whitespace-pre-wrap">{comment.content}</p>
+      {/* Contenido o editor */}
+      {editing ? (
+        <div className="flex flex-col gap-2 mb-2">
+          <Textarea
+            rows={2}
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+          />
+          <div className="flex gap-2">
+            <button onClick={handleEdit} className="text-neon-blue hover:text-neon-blue/70 transition-colors">
+              <Check size={14} />
+            </button>
+            <button onClick={() => setEditing(false)} className="text-gray-600 hover:text-gray-400 transition-colors">
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p className="text-gray-300 text-sm mb-2 whitespace-pre-wrap">{comment.content}</p>
+      )}
 
       {/* Acciones */}
       <div className="flex items-center gap-3 mb-2">
         <button
           onClick={handleLike}
-          className="flex items-center gap-1 font-mono text-xs transition-colors text-gray-600 hover:text-neon-blue"
+          className="flex items-center gap-1 font-mono text-xs text-gray-600 hover:text-neon-blue transition-colors"
         >
           <ArrowUp size={16} className={comment.upvotes > 0 ? 'text-neon-blue' : ''} />
-          <span className={comment.upvotes > 0 ? 'text-neon-blue' : ''}>
-            {comment.upvotes || 0}
-          </span>
+          <span className={comment.upvotes > 0 ? 'text-neon-blue' : ''}>{comment.upvotes || 0}</span>
         </button>
+
         {depth < 6 && (
           <button
-            onClick={() => setReplying(!replying)}
+            onClick={() => {
+              setReplying(!replying);
+              setReplyText(`@${comment.username || comment.anonymous_id} `);
+            }}
             className="font-mono text-xs text-gray-600 hover:text-neon-blue transition-colors"
           >
             {replying ? 'cancelar' : 'responder'}
           </button>
         )}
+
+        {isOwner && !editing && (
+          <>
+            <button
+              onClick={() => setEditing(true)}
+              className="font-mono text-xs text-gray-600 hover:text-neon-blue transition-colors"
+            >
+              <Edit2 size={12} />
+            </button>
+            <button
+              onClick={handleDelete}
+              className="font-mono text-xs text-gray-600 hover:text-red-500 transition-colors"
+            >
+              <Trash2 size={12} />
+            </button>
+          </>
+        )}
       </div>
-      {/* Reply form */}
+
+      {/* Reply Form */}
       {replying && (
         <div className="flex flex-col gap-2 mb-3">
           <Textarea
             placeholder="Tu respuesta..."
-            rows={3}
+            rows={2}
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
           />
@@ -121,7 +187,7 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
         </div>
       )}
 
-      {/* Replies recursivas */}
+      {/* Replies recursiva */}
       {comment.replies?.length > 0 && (
         <div className="flex flex-col gap-3 mt-3">
           {comment.replies.map((reply) => (
@@ -145,6 +211,7 @@ const PostDetail = () => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const { user } = useAuthStore();
 
   useEffect(() => {
     fetchPost(id);
@@ -252,12 +319,32 @@ const PostDetail = () => {
             <img src={currentPost.image_url} alt="" className="rounded border border-dark-600 max-w-full" />
           )}
 
-          <div className="flex items-center gap-1 font-mono text-xs text-gray-600">
-            <MessageSquare size={13} />
-            {currentPost.comment_count} comentarios
+          <div className="flex items-center justify-between mt-3">
+            <div className="flex items-center gap-1 font-mono text-xs text-gray-600">
+              <MessageSquare size={13} />
+              {currentPost.comment_count} comentarios
+            </div>
+            {user && currentPost.username === user.username && (
+              <button
+                onClick={async () => {
+                  if (!confirm('¿Eliminar este post?')) return;
+                  try {
+                    await postsApi.delete(currentPost.id);
+                    toast.success('Post eliminado');
+                    navigate('/');
+                  } catch {
+                    toast.error('Error al eliminar');
+                  }
+                }}
+                className="flex items-center gap-1 font-mono text-xs text-gray-600 hover:text-red-500 transition-colors"
+              >
+                <Trash2 size={13} /> eliminar post
+              </button>
+            )}
           </div>
         </div>
       </div>
+
 
       {/* Votos */}
       <div className="flex items-center gap-4">
