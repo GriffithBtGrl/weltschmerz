@@ -19,6 +19,7 @@ api.interceptors.response.use(
     if (err.response?.status === 401) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+      window.location.href = "/login";
     }
     return Promise.reject(err);
   },
@@ -29,7 +30,7 @@ export const postsApi = {
   getAll: (params) => api.get("/posts", { params }),
   getOne: (id) => api.get(`/posts/${id}`),
   create: (data) => api.post("/posts", data),
-  update:  (id, data)  => api.patch(`/posts/${id}`, data),
+  update: (id, data) => api.patch(`/posts/${id}`, data),
   delete: (id) => api.delete(`/posts/${id}`),
 };
 

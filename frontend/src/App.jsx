@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/layout/Navbar';
@@ -6,10 +7,23 @@ import CreatePost from './pages/CreatePost';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import PostDetail from './pages/PostDetail';
-import Admin from './pages/Admin';
 import Profile from './pages/Profile';
+import Admin from './pages/Admin';
+import useAuthStore from './store/authStore';
+import { authApi } from './services/api';
 
 const App = () => {
+  const { logout } = useAuthStore();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      authApi.me().catch(() => {
+        logout();
+      });
+    }
+  }, []);
+
   return (
     <BrowserRouter>
       <Toaster
@@ -27,13 +41,13 @@ const App = () => {
       <Navbar />
       <main>
         <Routes>
-          <Route path="/"         element={<Home />} />
-          <Route path="/create"   element={<CreatePost />} />
-          <Route path="/login"    element={<Login />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/create" element={<CreatePost />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/post/:id" element={<PostDetail />} />
-          <Route path="/admin" element={<Admin />} />
           <Route path="/user/:username" element={<Profile />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
     </BrowserRouter>
