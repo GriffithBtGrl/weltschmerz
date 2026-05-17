@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import usePostStore from '../store/postStore';
 import Badge from '../components/ui/Badge';
@@ -9,11 +9,13 @@ import { es } from 'date-fns/locale';
 import { votesApi } from '../services/api';
 import toast from 'react-hot-toast';
 
+const saveScroll = () => sessionStorage.setItem('homeScroll', window.scrollY);
+
 const PostCard = ({ post, onVote }) => {
   return (
     <div className="bg-dark-800 border border-dark-600 rounded-lg p-4 hover:border-neon-blue/30 transition-all duration-200">
       <div className="flex flex-col gap-2">
-        {/* Header: avatar + username + badge + tiempo */}
+        {/* Header */}
         <div className="flex items-center gap-2 flex-wrap">
           {post.avatar_url ? (
             <img src={post.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover border border-dark-600" />
@@ -38,11 +40,9 @@ const PostCard = ({ post, onVote }) => {
           </span>
         </div>
 
-
-
         {/* Título y contenido */}
         <div>
-          <Link to={`/post/${post.id}`}>
+          <Link to={`/post/${post.id}`} onClick={saveScroll}>
             <h2 className="font-mono text-gray-200 hover:text-neon-blue transition-colors cursor-pointer">
               {post.title}
             </h2>
@@ -64,14 +64,14 @@ const PostCard = ({ post, onVote }) => {
           <button
             onClick={() => onVote(post.id, 1)}
             className={`flex items-center gap-1 transition-colors font-mono text-xs
-      ${post.user_vote === 1 ? 'text-neon-blue' : 'text-gray-600 hover:text-neon-blue'}`}
+              ${post.user_vote === 1 ? 'text-neon-blue' : 'text-gray-600 hover:text-neon-blue'}`}
           >
             <ArrowUp size={14} /> {post.upvotes || 0}
           </button>
           <button
             onClick={() => onVote(post.id, -1)}
             className={`flex items-center gap-1 transition-colors font-mono text-xs
-      ${post.user_vote === -1 ? 'text-neon-magenta' : 'text-gray-600 hover:text-neon-magenta'}`}
+              ${post.user_vote === -1 ? 'text-neon-magenta' : 'text-gray-600 hover:text-neon-magenta'}`}
           >
             <ArrowDown size={14} /> {post.downvotes || 0}
           </button>
@@ -81,6 +81,7 @@ const PostCard = ({ post, onVote }) => {
         <div className="flex items-center gap-3">
           <Link
             to={`/post/${post.id}`}
+            onClick={saveScroll}
             className="flex items-center gap-1 text-xs font-mono text-gray-500 hover:text-neon-blue transition-colors"
           >
             <MessageSquare size={13} />
@@ -93,15 +94,25 @@ const PostCard = ({ post, onVote }) => {
 };
 
 const Home = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { posts, loading, sort, fetchPosts, setSort, setBoard, updateVoteScore } = usePostStore();
+  const [searchParams] = useSearchParams();
+  const { posts, loading, sort, fetchPosts, setSort, setBoard } = usePostStore();
 
   const board = searchParams.get('board');
+
+  const scrollRestored = useRef(false);
 
   useEffect(() => {
     setBoard(board);
     fetchPosts();
   }, [board, sort]);
+
+  useEffect(() => {
+    const savedScroll = sessionStorage.getItem('homeScroll');
+    if (savedScroll) {
+      window.scrollTo(0, parseInt(savedScroll));
+      sessionStorage.removeItem('homeScroll');
+    }
+  }, [posts]);
 
   const handleVote = async (postId, value) => {
     try {
