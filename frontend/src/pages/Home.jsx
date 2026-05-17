@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect} from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import usePostStore from '../store/postStore';
 import Badge from '../components/ui/Badge';
@@ -99,7 +99,6 @@ const Home = () => {
 
   const board = searchParams.get('board');
 
-  const scrollRestored = useRef(false);
 
   useEffect(() => {
     setBoard(board);
