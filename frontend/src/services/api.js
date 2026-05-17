@@ -29,6 +29,7 @@ export const postsApi = {
   getAll: (params) => api.get("/posts", { params }),
   getOne: (id) => api.get(`/posts/${id}`),
   create: (data) => api.post("/posts", data),
+  update:  (id, data)  => api.patch(`/posts/${id}`, data),
   delete: (id) => api.delete(`/posts/${id}`),
 };
 

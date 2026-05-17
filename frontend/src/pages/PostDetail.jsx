@@ -1,20 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ArrowUp, ArrowDown, MessageSquare, ArrowLeft } from 'lucide-react';
+import { ArrowUp, ArrowDown, MessageSquare, ArrowLeft, Trash2, Edit2, X, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import usePostStore from '../store/postStore';
 import { commentsApi, votesApi, postsApi } from '../services/api';
-import { Trash2, Edit2, X, Check } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Textarea from '../components/ui/Textarea';
 
-
-
-// Componente recursivo de comentario
 const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
   const [replying, setReplying] = useState(false);
   const [replyText, setReplyText] = useState('');
@@ -29,10 +25,7 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
     if (!replyText.trim()) return;
     setSubmitting(true);
     try {
-      await commentsApi.create(postId, {
-        content: replyText,
-        parent_id: comment.id,
-      });
+      await commentsApi.create(postId, { content: replyText, parent_id: comment.id });
       setReplyText('');
       setReplying(false);
       onReplyCreated();
@@ -96,9 +89,7 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
             {comment.username}
           </Link>
         ) : (
-          <span className="font-mono text-xs text-neon-blue">
-            {comment.anonymous_id || 'anónimo'}
-          </span>
+          <span className="font-mono text-xs text-neon-blue">{comment.anonymous_id || 'anónimo'}</span>
         )}
         {comment.role === 'admin' && <Badge variant="magenta">admin</Badge>}
         <span className="font-mono text-xs text-gray-600">
@@ -106,14 +97,9 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
         </span>
       </div>
 
-      {/* Contenido o editor */}
       {editing ? (
         <div className="flex flex-col gap-2 mb-2">
-          <Textarea
-            rows={2}
-            value={editText}
-            onChange={(e) => setEditText(e.target.value)}
-          />
+          <Textarea rows={2} value={editText} onChange={(e) => setEditText(e.target.value)} />
           <div className="flex gap-2">
             <button onClick={handleEdit} className="text-neon-blue hover:text-neon-blue/70 transition-colors">
               <Check size={14} />
@@ -127,12 +113,8 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
         <p className="text-gray-300 text-sm mb-2 whitespace-pre-wrap">{comment.content}</p>
       )}
 
-      {/* Acciones */}
       <div className="flex items-center gap-3 mb-2">
-        <button
-          onClick={handleLike}
-          className="flex items-center gap-1 font-mono text-xs text-gray-600 hover:text-neon-blue transition-colors"
-        >
+        <button onClick={handleLike} className="flex items-center gap-1 font-mono text-xs text-gray-600 hover:text-neon-blue transition-colors">
           <ArrowUp size={16} className={comment.upvotes > 0 ? 'text-neon-blue' : ''} />
           <span className={comment.upvotes > 0 ? 'text-neon-blue' : ''}>{comment.upvotes || 0}</span>
         </button>
@@ -151,53 +133,30 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
 
         {isOwner && !editing && (
           <>
-            <button
-              onClick={() => setEditing(true)}
-              className="font-mono text-xs text-gray-600 hover:text-neon-blue transition-colors"
-            >
+            <button onClick={() => setEditing(true)} className="font-mono text-xs text-gray-600 hover:text-neon-blue transition-colors">
               <Edit2 size={12} />
             </button>
-            <button
-              onClick={handleDelete}
-              className="font-mono text-xs text-gray-600 hover:text-red-500 transition-colors"
-            >
+            <button onClick={handleDelete} className="font-mono text-xs text-gray-600 hover:text-red-500 transition-colors">
               <Trash2 size={12} />
             </button>
           </>
         )}
       </div>
 
-      {/* Reply Form */}
       {replying && (
         <div className="flex flex-col gap-2 mb-3">
-          <Textarea
-            placeholder="Tu respuesta..."
-            rows={2}
-            value={replyText}
-            onChange={(e) => setReplyText(e.target.value)}
-          />
+          <Textarea placeholder="Tu respuesta..." rows={2} value={replyText} onChange={(e) => setReplyText(e.target.value)} />
           <div className="flex gap-2">
-            <Button size="sm" variant="primary" loading={submitting} onClick={handleReply}>
-              responder
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setReplying(false)}>
-              cancelar
-            </Button>
+            <Button size="sm" variant="primary" loading={submitting} onClick={handleReply}>responder</Button>
+            <Button size="sm" variant="ghost" onClick={() => setReplying(false)}>cancelar</Button>
           </div>
         </div>
       )}
 
-      {/* Replies recursiva */}
       {comment.replies?.length > 0 && (
         <div className="flex flex-col gap-3 mt-3">
           {comment.replies.map((reply) => (
-            <Comment
-              key={reply.id}
-              comment={reply}
-              postId={postId}
-              onReplyCreated={onReplyCreated}
-              depth={depth + 1}
-            />
+            <Comment key={reply.id} comment={reply} postId={postId} onReplyCreated={onReplyCreated} depth={depth + 1} />
           ))}
         </div>
       )}
@@ -207,10 +166,13 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
 
 const PostDetail = () => {
   const { id } = useParams();
-  const { currentPost, fetchPost, loading, updateVoteScore } = usePostStore();
+  const navigate = useNavigate();
+  const { currentPost, fetchPost, loading } = usePostStore();
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [editingPost, setEditingPost] = useState(false);
+  const [editPostData, setEditPostData] = useState({ title: '', content: '' });
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -230,13 +192,24 @@ const PostDetail = () => {
   const handleVote = async (value) => {
     try {
       await votesApi.vote('post', id, value);
-      usePostStore.setState((state) => ({
-        currentPost: state.currentPost ? {
-          ...state.currentPost,
-          upvotes: value === 1 ? (state.currentPost.upvotes || 0) + 1 : state.currentPost.upvotes,
-          downvotes: value === -1 ? (state.currentPost.downvotes || 0) + 1 : state.currentPost.downvotes,
-        } : null,
-      }));
+      usePostStore.setState((state) => {
+        const post = state.currentPost;
+        if (!post) return state;
+        const prevVote = post.user_vote;
+        const removing = prevVote === value;
+        return {
+          currentPost: {
+            ...post,
+            user_vote: removing ? null : value,
+            upvotes: value === 1
+              ? removing ? (post.upvotes || 0) - 1 : (post.upvotes || 0) + 1
+              : prevVote === 1 ? (post.upvotes || 0) - 1 : post.upvotes,
+            downvotes: value === -1
+              ? removing ? (post.downvotes || 0) - 1 : (post.downvotes || 0) + 1
+              : prevVote === -1 ? (post.downvotes || 0) - 1 : post.downvotes,
+          }
+        };
+      });
     } catch {
       toast.error('Error al votar');
     }
@@ -257,6 +230,28 @@ const PostDetail = () => {
     }
   };
 
+  const handleSavePost = async () => {
+    try {
+      await postsApi.update(currentPost.id, editPostData);
+      setEditingPost(false);
+      fetchPost(currentPost.id);
+      toast.success('Post editado');
+    } catch {
+      toast.error('Error al editar');
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (!confirm('¿Eliminar este post?')) return;
+    try {
+      await postsApi.delete(currentPost.id);
+      toast.success('Post eliminado');
+      navigate('/');
+    } catch {
+      toast.error('Error al eliminar');
+    }
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center py-20">
       <span className="font-mono text-gray-600 animate-pulse">cargando...</span>
@@ -272,12 +267,10 @@ const PostDetail = () => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
-      {/* Back */}
       <Link to="/" className="flex items-center gap-1 font-mono text-xs text-gray-600 hover:text-neon-blue transition-colors mb-4">
         <ArrowLeft size={13} /> volver al feed
       </Link>
 
-      {/* Post */}
       <div className="bg-dark-800 border border-dark-600 rounded-lg p-5 mb-6">
         <div className="flex flex-col gap-3">
           {/* Header */}
@@ -295,9 +288,7 @@ const PostDetail = () => {
                 {currentPost.username}
               </Link>
             ) : (
-              <span className="font-mono text-xs text-gray-500">
-                {currentPost.anonymous_id || 'anónimo'}
-              </span>
+              <span className="font-mono text-xs text-gray-500">{currentPost.anonymous_id || 'anónimo'}</span>
             )}
             {currentPost.role === 'admin' && <Badge variant="magenta">admin</Badge>}
             <span className="font-mono text-xs text-gray-600">
@@ -305,107 +296,105 @@ const PostDetail = () => {
             </span>
           </div>
 
+          {/* Votos */}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => handleVote(1)}
+              className={`flex items-center gap-1 font-mono text-sm transition-colors ${currentPost.user_vote === 1 ? 'text-neon-blue' : 'text-gray-600 hover:text-neon-blue'}`}
+            >
+              <ArrowUp size={16} /> {currentPost.upvotes || 0}
+            </button>
+            <button
+              onClick={() => handleVote(-1)}
+              className={`flex items-center gap-1 font-mono text-sm transition-colors ${currentPost.user_vote === -1 ? 'text-neon-magenta' : 'text-gray-600 hover:text-neon-magenta'}`}
+            >
+              <ArrowDown size={16} /> {currentPost.downvotes || 0}
+            </button>
+          </div>
 
-
-          {/* Título */}
-          <h1 className="font-mono text-lg text-gray-100">{currentPost.title}</h1>
-
-          {/* Contenido */}
-          {currentPost.content && (
-            <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{currentPost.content}</p>
+          {/* Título y contenido */}
+          {editingPost ? (
+            <div className="flex flex-col gap-3">
+              <input
+                className="bg-dark-950 border border-neon-blue text-gray-200 rounded px-3 py-2 font-mono text-sm focus:outline-none w-full"
+                value={editPostData.title}
+                onChange={(e) => setEditPostData({ ...editPostData, title: e.target.value })}
+              />
+              <textarea
+                className="bg-dark-950 border border-neon-blue text-gray-200 rounded px-3 py-2 font-mono text-sm focus:outline-none w-full resize-none"
+                rows={5}
+                value={editPostData.content}
+                onChange={(e) => setEditPostData({ ...editPostData, content: e.target.value })}
+              />
+              <div className="flex gap-2">
+                <Button size="sm" variant="primary" onClick={handleSavePost}>guardar</Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditingPost(false)}>cancelar</Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <h1 className="font-mono text-lg text-gray-100">{currentPost.title}</h1>
+              {currentPost.content && (
+                <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{currentPost.content}</p>
+              )}
+            </>
           )}
 
           {currentPost.image_url && (
             <img src={currentPost.image_url} alt="" className="rounded border border-dark-600 max-w-full" />
           )}
 
-          <div className="flex items-center justify-between mt-3">
+          {/* Footer */}
+          <div className="flex items-center justify-between mt-1">
             <div className="flex items-center gap-1 font-mono text-xs text-gray-600">
               <MessageSquare size={13} />
               {currentPost.comment_count} comentarios
             </div>
             {user && currentPost.username === user.username && (
-              <button
-                onClick={async () => {
-                  if (!confirm('¿Eliminar este post?')) return;
-                  try {
-                    await postsApi.delete(currentPost.id);
-                    toast.success('Post eliminado');
-                    navigate('/');
-                  } catch {
-                    toast.error('Error al eliminar');
-                  }
-                }}
-                className="flex items-center gap-1 font-mono text-xs text-gray-600 hover:text-red-500 transition-colors"
-              >
-                <Trash2 size={13} /> eliminar post
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setEditPostData({ title: currentPost.title, content: currentPost.content || '' });
+                    setEditingPost(true);
+                  }}
+                  className="flex items-center gap-1 font-mono text-xs text-gray-600 hover:text-neon-blue transition-colors"
+                >
+                  <Edit2 size={13} /> editar
+                </button>
+                <button
+                  onClick={handleDeletePost}
+                  className="flex items-center gap-1 font-mono text-xs text-gray-600 hover:text-red-500 transition-colors"
+                >
+                  <Trash2 size={13} /> eliminar
+                </button>
+              </div>
             )}
           </div>
         </div>
       </div>
 
-
-      {/* Votos */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => handleVote(1)}
-          disabled={currentPost.user_vote === 1}
-          className={`flex items-center gap-1 font-mono text-sm transition-colors
-      ${currentPost.user_vote === 1
-              ? 'text-neon-blue cursor-not-allowed'
-              : 'text-gray-600 hover:text-neon-blue'
-            }`}
-        >
-          <ArrowUp size={16} /> {currentPost.upvotes || 0}
-        </button>
-        <button
-          onClick={() => handleVote(-1)}
-          disabled={currentPost.user_vote === -1}
-          className={`flex items-center gap-1 font-mono text-sm transition-colors
-      ${currentPost.user_vote === -1
-              ? 'text-neon-magenta cursor-not-allowed'
-              : 'text-gray-600 hover:text-neon-magenta'
-            }`}
-        >
-          <ArrowDown size={16} /> -{currentPost.downvotes || 0}
-        </button>
-      </div>
-
       {/* Nuevo comentario */}
       <div className="bg-dark-800 border border-dark-600 rounded-lg p-4 mb-6">
-        <h3 className="font-mono text-xs text-gray-400 uppercase tracking-wider mb-3">
-          dejar comentario
-        </h3>
+        <h3 className="font-mono text-xs text-gray-400 uppercase tracking-wider mb-3">dejar comentario</h3>
         <Textarea
           placeholder="Escribe algo... puedes ser anónimo."
-          rows={3}
+          rows={2}
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
         />
         <div className="flex justify-end mt-2">
-          <Button variant="primary" loading={submitting} onClick={handleComment}>
-            comentar
-          </Button>
+          <Button variant="primary" loading={submitting} onClick={handleComment}>comentar</Button>
         </div>
       </div>
 
-      {/* Lista de comentarios */}
+      {/* Comentarios */}
       <div className="flex flex-col gap-4">
-        <h3 className="font-mono text-xs text-gray-400 uppercase tracking-wider">
-          {comments.length} comentarios
-        </h3>
+        <h3 className="font-mono text-xs text-gray-400 uppercase tracking-wider">{comments.length} comentarios</h3>
         {comments.length === 0 ? (
           <p className="font-mono text-sm text-gray-600">sé el primero en comentar.</p>
         ) : (
           comments.map((comment) => (
-            <Comment
-              key={comment.id}
-              comment={comment}
-              postId={id}
-              onReplyCreated={loadComments}
-              depth={0}
-            />
+            <Comment key={comment.id} comment={comment} postId={id} onReplyCreated={loadComments} depth={0} />
           ))
         )}
       </div>
