@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import usePostStore from '../store/postStore';
 import Badge from '../components/ui/Badge';
@@ -99,20 +99,30 @@ const Home = () => {
 
   const board = searchParams.get('board');
 
+  const prevBoardRef = useRef(board);
+  const prevSortRef = useRef(sort);
 
   useEffect(() => {
     setBoard(board);
-    if (posts.length === 0) {
+    const boardChanged = prevBoardRef.current !== board;
+    const sortChanged = prevSortRef.current !== sort;
+
+    console.log('boardChanged:', boardChanged, 'sortChanged:', sortChanged, 'posts:', posts.length);
+
+    if (posts.length === 0 || boardChanged || sortChanged) {
+      prevBoardRef.current = board;
+      prevSortRef.current = sort;
       fetchPosts();
+    } else {
+      const savedScroll = sessionStorage.getItem('homeScroll');
+      console.log('savedScroll en else:', savedScroll);
+      if (savedScroll) {
+        const pos = parseInt(savedScroll);
+        sessionStorage.removeItem('homeScroll');
+        setTimeout(() => window.scrollTo(0, pos), 50);
+      }
     }
   }, [board, sort]);
-  useEffect(() => {
-    const savedScroll = sessionStorage.getItem('homeScroll');
-    if (savedScroll) {
-      window.scrollTo(0, parseInt(savedScroll));
-      sessionStorage.removeItem('homeScroll');
-    }
-  }, [posts]);
 
   const handleVote = async (postId, value) => {
     try {
