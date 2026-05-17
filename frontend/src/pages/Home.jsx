@@ -1,4 +1,4 @@
-import { useEffect} from 'react';
+import { useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import usePostStore from '../store/postStore';
 import Badge from '../components/ui/Badge';
@@ -102,9 +102,10 @@ const Home = () => {
 
   useEffect(() => {
     setBoard(board);
-    fetchPosts();
+    if (posts.length === 0) {
+      fetchPosts();
+    }
   }, [board, sort]);
-
   useEffect(() => {
     const savedScroll = sessionStorage.getItem('homeScroll');
     if (savedScroll) {
