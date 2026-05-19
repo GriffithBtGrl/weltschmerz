@@ -31,7 +31,7 @@ const PostCard = ({ post, onVote }) => {
             </Link>
           ) : (
             <span className="font-mono text-xs text-gray-500">
-              {post.anonymous_id || 'anónimo'}
+              {post.anonymous_id ? post.anonymous_id.substring(0, 10) : 'anónimo'}
             </span>
           )}
           {post.role === 'admin' && <Badge variant="magenta">admin</Badge>}
@@ -193,8 +193,8 @@ const Home = () => {
           <button
             onClick={() => handleSort('new')}
             className={`flex items-center gap-1 px-3 py-1.5 rounded font-mono text-xs border transition-all ${sort === 'new'
-                ? 'border-neon-blue text-neon-blue bg-neon-blue/10'
-                : 'border-dark-600 text-gray-500 hover:border-gray-500'
+              ? 'border-neon-blue text-neon-blue bg-neon-blue/10'
+              : 'border-dark-600 text-gray-500 hover:border-gray-500'
               }`}
           >
             <Clock size={12} /> nuevo
@@ -202,8 +202,8 @@ const Home = () => {
           <button
             onClick={() => handleSort('popular')}
             className={`flex items-center gap-1 px-3 py-1.5 rounded font-mono text-xs border transition-all ${sort === 'popular'
-                ? 'border-neon-magenta text-neon-magenta bg-neon-magenta/10'
-                : 'border-dark-600 text-gray-500 hover:border-gray-500'
+              ? 'border-neon-magenta text-neon-magenta bg-neon-magenta/10'
+              : 'border-dark-600 text-gray-500 hover:border-gray-500'
               }`}
           >
             <Flame size={12} /> popular

@@ -9,18 +9,19 @@ import Register from './pages/Register';
 import PostDetail from './pages/PostDetail';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
+import AnonProfile from './pages/AnonProfile';
 import useAuthStore from './store/authStore';
 import { authApi } from './services/api';
+import getAnonId from './utils/anonId';
 
 const App = () => {
   const { logout } = useAuthStore();
 
   useEffect(() => {
+    getAnonId();
     const token = localStorage.getItem('token');
     if (token) {
-      authApi.me().catch(() => {
-        logout();
-      });
+      authApi.me().catch(() => logout());
     }
   }, []);
 
@@ -41,13 +42,14 @@ const App = () => {
       <Navbar />
       <main>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/create" element={<CreatePost />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/post/:id" element={<PostDetail />} />
+          <Route path="/"             element={<Home />} />
+          <Route path="/create"       element={<CreatePost />} />
+          <Route path="/login"        element={<Login />} />
+          <Route path="/register"     element={<Register />} />
+          <Route path="/post/:id"     element={<PostDetail />} />
           <Route path="/user/:username" element={<Profile />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin"        element={<Admin />} />
+          <Route path="/anon"         element={<AnonProfile />} />
         </Routes>
       </main>
     </BrowserRouter>

@@ -75,6 +75,12 @@ const Navbar = () => {
             </>
           )}
 
+          {!user && (
+            <Link to="/anon" className="font-mono text-xs text-gray-600 hover:text-neon-blue transition-colors hidden sm:block">
+              mi actividad
+            </Link>
+          )}
+
           {/* Hamburguesa solo mobile */}
           <button
             className="md:hidden text-gray-400 hover:text-neon-blue transition-colors ml-1"

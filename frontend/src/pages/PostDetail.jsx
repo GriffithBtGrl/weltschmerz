@@ -89,7 +89,9 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
             {comment.username}
           </Link>
         ) : (
-          <span className="font-mono text-xs text-neon-blue">{comment.anonymous_id || 'anónimo'}</span>
+          <span className="font-mono text-xs text-neon-blue">
+            {comment.anonymous_id ? comment.anonymous_id.substring(0, 10) : 'anónimo'}
+          </span>
         )}
         {comment.role === 'admin' && <Badge variant="magenta">admin</Badge>}
         <span className="font-mono text-xs text-gray-600">

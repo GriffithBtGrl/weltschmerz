@@ -1,18 +1,24 @@
 import axios from "axios";
 
+// Instancia base de axios
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "/api",
   headers: { "Content-Type": "application/json" },
 });
 
-// Adjuntar token automáticamente si existe
+// Adjunta token si existe, o anonymous_id si no hay sesión
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    const anonId = localStorage.getItem("anonymous_id");
+    if (anonId) config.headers["X-Anonymous-Id"] = anonId;
+  }
   return config;
 });
 
-// Manejar errores globalmente
+// Cierra sesión automáticamente si el token expira
 api.interceptors.response.use(
   (res) => res,
   (err) => {
@@ -25,36 +31,36 @@ api.interceptors.response.use(
   },
 );
 
-// Posts
+// Posts: obtener todos, uno, crear, editar, eliminar
 export const postsApi = {
-  getAll: (params) => api.get("/posts", { params }),
-  getOne: (id) => api.get(`/posts/${id}`),
-  create: (data) => api.post("/posts", data),
-  update: (id, data) => api.patch(`/posts/${id}`, data),
-  delete: (id) => api.delete(`/posts/${id}`),
+  getAll:  (params)    => api.get("/posts", { params }),
+  getOne:  (id)        => api.get(`/posts/${id}`),
+  create:  (data)      => api.post("/posts", data),
+  update:  (id, data)  => api.patch(`/posts/${id}`, data),
+  delete:  (id)        => api.delete(`/posts/${id}`),
 };
 
-// Comments
+// Comentarios: obtener, crear, editar, eliminar
 export const commentsApi = {
-  getAll: (postId) => api.get(`/posts/${postId}/comments`),
-  create: (postId, data) => api.post(`/posts/${postId}/comments`, data),
-  delete: (id) => api.delete(`/comments/${id}`),
-  update: (id, content) => api.patch(`/comments/${id}`, { content }),
+  getAll:  (postId)       => api.get(`/posts/${postId}/comments`),
+  create:  (postId, data) => api.post(`/posts/${postId}/comments`, data),
+  delete:  (id)           => api.delete(`/comments/${id}`),
+  update:  (id, content)  => api.patch(`/comments/${id}`, { content }),
 };
 
-// Votes
+// Votos: votar en post o comentario
 export const votesApi = {
   vote: (type, id, value) => api.post(`/votes/${type}/${id}`, { value }),
 };
 
-// Auth
+// Auth: registro, login, obtener usuario actual
 export const authApi = {
   register: (data) => api.post("/auth/register", data),
-  login: (data) => api.post("/auth/login", data),
-  me: () => api.get("/auth/me"),
+  login:    (data) => api.post("/auth/login", data),
+  me:       ()     => api.get("/auth/me"),
 };
 
-// Upload
+// Upload: subir imagen a Cloudinary
 export const uploadApi = {
   upload: (file) => {
     const formData = new FormData();
@@ -65,11 +71,12 @@ export const uploadApi = {
   },
 };
 
-// Users
+// Usuarios: perfil, perfil anónimo, editar bio y avatar
 export const usersApi = {
-  getProfile: (username) => api.get(`/users/${username}`),
-  updateBio: (bio) => api.patch("/users/me/bio", { bio }),
-  updateAvatar: (file) => {
+  getProfile:     (username) => api.get(`/users/${username}`),
+  getAnonProfile: (anonId)   => api.get(`/users/anon/${anonId}`),
+  updateBio:      (bio)      => api.patch("/users/me/bio", { bio }),
+  updateAvatar:   (file)     => {
     const formData = new FormData();
     formData.append("avatar", file);
     return api.patch("/users/me/avatar", formData, {
@@ -78,15 +85,15 @@ export const usersApi = {
   },
 };
 
-// Admin
+// Admin: stats, posts, usuarios, comentarios, moderar
 export const adminApi = {
-  getStats: () => api.get("/admin/stats"),
-  getPosts: () => api.get("/admin/posts"),
-  getUsers: () => api.get("/admin/users"),
-  getComments: () => api.get("/admin/comments"),
-  deletePost: (id) => api.delete(`/admin/posts/${id}`),
-  deleteComment: (id) => api.delete(`/admin/comments/${id}`),
-  pinPost: (id) => api.patch(`/admin/posts/${id}/pin`),
+  getStats:      ()    => api.get("/admin/stats"),
+  getPosts:      ()    => api.get("/admin/posts"),
+  getUsers:      ()    => api.get("/admin/users"),
+  getComments:   ()    => api.get("/admin/comments"),
+  deletePost:    (id)  => api.delete(`/admin/posts/${id}`),
+  deleteComment: (id)  => api.delete(`/admin/comments/${id}`),
+  pinPost:       (id)  => api.patch(`/admin/posts/${id}/pin`),
 };
 
 export default api;
