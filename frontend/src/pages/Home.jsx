@@ -130,7 +130,7 @@ const Home = () => {
       usePostStore.setState((state) => ({
         posts: state.posts.map((p) => {
           if (p.id !== postId) return p;
-          const prevVote = p.user_vote;
+          const prevVote = p.user_vote !== null ? Number(p.user_vote) : null;
           const removing = prevVote === value;
           return {
             ...p,

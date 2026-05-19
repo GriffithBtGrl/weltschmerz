@@ -195,7 +195,7 @@ const PostDetail = () => {
       usePostStore.setState((state) => {
         const post = state.currentPost;
         if (!post) return state;
-        const prevVote = post.user_vote;
+        const prevVote = post.user_vote !== null ? Number(post.user_vote) : null;
         const removing = prevVote === value;
         return {
           currentPost: {
