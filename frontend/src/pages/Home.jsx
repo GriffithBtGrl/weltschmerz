@@ -95,7 +95,7 @@ const PostCard = ({ post, onVote }) => {
 
 const Home = () => {
   const [searchParams] = useSearchParams();
-  const { posts, loading, sort, fetchPosts, setSort, setBoard } = usePostStore();
+  const { posts, loading, loadingMore, hasMore, sort, fetchPosts, fetchMorePosts, setSort, setBoard } = usePostStore();
 
   const board = searchParams.get('board');
 
@@ -107,15 +107,12 @@ const Home = () => {
     const boardChanged = prevBoardRef.current !== board;
     const sortChanged = prevSortRef.current !== sort;
 
-    console.log('boardChanged:', boardChanged, 'sortChanged:', sortChanged, 'posts:', posts.length);
-
     if (posts.length === 0 || boardChanged || sortChanged) {
       prevBoardRef.current = board;
       prevSortRef.current = sort;
       fetchPosts();
     } else {
       const savedScroll = sessionStorage.getItem('homeScroll');
-      console.log('savedScroll en else:', savedScroll);
       if (savedScroll) {
         const pos = parseInt(savedScroll);
         sessionStorage.removeItem('homeScroll');
@@ -123,6 +120,32 @@ const Home = () => {
       }
     }
   }, [board, sort]);
+
+  useEffect(() => {
+    if (!loading && posts.length > 0) {
+      const savedScroll = sessionStorage.getItem('homeScroll');
+      if (savedScroll) {
+        const pos = parseInt(savedScroll);
+        sessionStorage.removeItem('homeScroll');
+        setTimeout(() => window.scrollTo(0, pos), 50);
+      }
+    }
+  }, [loading]);
+
+  // Scroll infinito
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrolledTo = window.scrollY + window.innerHeight;
+      const pageHeight = document.documentElement.scrollHeight;
+      const nearBottom = pageHeight - scrolledTo < 300;
+      if (nearBottom && !loadingMore && hasMore) {
+        fetchMorePosts();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loadingMore, hasMore]);
 
   const handleVote = async (postId, value) => {
     try {
@@ -170,8 +193,8 @@ const Home = () => {
           <button
             onClick={() => handleSort('new')}
             className={`flex items-center gap-1 px-3 py-1.5 rounded font-mono text-xs border transition-all ${sort === 'new'
-              ? 'border-neon-blue text-neon-blue bg-neon-blue/10'
-              : 'border-dark-600 text-gray-500 hover:border-gray-500'
+                ? 'border-neon-blue text-neon-blue bg-neon-blue/10'
+                : 'border-dark-600 text-gray-500 hover:border-gray-500'
               }`}
           >
             <Clock size={12} /> nuevo
@@ -179,8 +202,8 @@ const Home = () => {
           <button
             onClick={() => handleSort('popular')}
             className={`flex items-center gap-1 px-3 py-1.5 rounded font-mono text-xs border transition-all ${sort === 'popular'
-              ? 'border-neon-magenta text-neon-magenta bg-neon-magenta/10'
-              : 'border-dark-600 text-gray-500 hover:border-gray-500'
+                ? 'border-neon-magenta text-neon-magenta bg-neon-magenta/10'
+                : 'border-dark-600 text-gray-500 hover:border-gray-500'
               }`}
           >
             <Flame size={12} /> popular
@@ -205,14 +228,28 @@ const Home = () => {
           </Link>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} onVote={handleVote} />
-          ))}
-        </div>
+        <>
+          <div className="flex flex-col gap-3">
+            {posts.map((post) => (
+              <PostCard key={post.id} post={post} onVote={handleVote} />
+            ))}
+          </div>
+
+          {/* Indicador de carga */}
+          {loadingMore && (
+            <div className="flex items-center justify-center py-6">
+              <span className="font-mono text-xs text-gray-600 animate-pulse">cargando más posts...</span>
+            </div>
+          )}
+
+          {!hasMore && posts.length > 0 && (
+            <div className="flex items-center justify-center py-6">
+              <span className="font-mono text-xs text-gray-600">— fin —</span>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
 };
-
 export default Home;
