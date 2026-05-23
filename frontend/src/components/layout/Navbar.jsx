@@ -19,8 +19,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="border-b border-dark-700 bg-dark-900/80 backdrop-blur-sm sticky top-0 z-50">
-      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+    <nav className="border-b border-dark-700 bg-dark-900/80 backdrop-blur-sm sticky top-0 z-40">      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="font-mono font-bold text-base md:text-lg text-neon-blue hover:text-neon-blue/80 transition-colors">
           <span className="text-gray-500">&gt;</span> weltschmerz
