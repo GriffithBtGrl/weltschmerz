@@ -36,6 +36,7 @@ app.use('/api/upload', require('./routes/upload'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/comments', require('./routes/comments'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
 app.use(errorHandler);

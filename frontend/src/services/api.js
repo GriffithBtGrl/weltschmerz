@@ -96,4 +96,12 @@ export const adminApi = {
   pinPost:       (id)  => api.patch(`/admin/posts/${id}/pin`),
 };
 
+// Notificaciones
+export const notificationsApi = {
+  getAll:      ()    => api.get('/notifications'),
+  getUnread:   ()    => api.get('/notifications/unread-count'),
+  readAll:     ()    => api.patch('/notifications/read-all'),
+  readOne:     (id)  => api.patch(`/notifications/${id}/read`),
+};
+
 export default api;

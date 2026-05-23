@@ -4,6 +4,7 @@ import useAuthStore from '../../store/authStore';
 import Button from '../ui/Button';
 import { Menu, X } from 'lucide-react';
 import Badge from '../ui/Badge';
+import NotificationBell from '../ui/NotificationBell';
 
 const BOARDS = ['random', 'anime', 'tech', 'gaming', 'music', 'memes', 'feels', 'art'];
 
@@ -48,6 +49,7 @@ const Navbar = () => {
                   <Badge variant="magenta">admin</Badge>
                 </Link>
               )}
+              <NotificationBell />
               <Link to={`/user/${user.username}`} className="flex items-center gap-1.5 group transition-colors">
                 {user.avatar_url ? (
                   <img src={user.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover border border-dark-600 group-hover:border-neon-blue transition-colors" />
