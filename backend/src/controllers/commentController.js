@@ -29,6 +29,12 @@ const createNotification = async (
   }
 };
 
+const extractMentions = (content) => {
+  const matches = content.match(/@([a-zA-Z0-9_]+)/g);
+  if (!matches) return [];
+  return [...new Set(matches.map(m => m.substring(1)))]; // quitar el @ y deduplicar
+};
+
 const getComments = async (req, res, next) => {
   try {
     const { postId } = req.params;
@@ -73,19 +79,14 @@ const createComment = async (req, res, next) => {
 
     if (!content) throw new AppError("El contenido es requerido", 400);
 
-    // Verificar que el post existe
     const post = await query("SELECT id FROM posts WHERE id = $1", [postId]);
     if (!post.rows[0]) throw new AppError("Post no encontrado", 404);
 
-    // Calcular depth
     let depth = 0;
     if (parent_id) {
-      const parent = await query("SELECT depth FROM comments WHERE id = $1", [
-        parent_id,
-      ]);
-      if (!parent.rows[0])
-        throw new AppError("Comentario padre no encontrado", 404);
-      depth = Math.min(parent.rows[0].depth + 1, 6); // máximo 6 niveles
+      const parent = await query("SELECT depth FROM comments WHERE id = $1", [parent_id]);
+      if (!parent.rows[0]) throw new AppError("Comentario padre no encontrado", 404);
+      depth = Math.min(parent.rows[0].depth + 1, 6);
     }
 
     const user_id = req.user?.id || null;
@@ -98,16 +99,10 @@ const createComment = async (req, res, next) => {
       [postId, parent_id || null, user_id, anonymous_id, content, depth],
     );
 
-    // Actualizar contador del post
-    await query(
-      "UPDATE posts SET comment_count = comment_count + 1 WHERE id = $1",
-      [postId],
-    );
+    await query("UPDATE posts SET comment_count = comment_count + 1 WHERE id = $1", [postId]);
 
-    // Notificar al dueño del post si no es el mismo que comenta
-    const postOwner = await query("SELECT user_id FROM posts WHERE id = $1", [
-      postId,
-    ]);
+    // Notificar al dueño del post
+    const postOwner = await query("SELECT user_id FROM posts WHERE id = $1", [postId]);
     const postOwnerId = postOwner.rows[0]?.user_id;
 
     if (postOwnerId && postOwnerId !== user_id) {
@@ -121,12 +116,9 @@ const createComment = async (req, res, next) => {
       );
     }
 
-    // Si es reply, notificar al dueño del comentario padre
+    // Notificar al dueño del comentario padre si es reply
     if (parent_id) {
-      const parentOwner = await query(
-        "SELECT user_id FROM comments WHERE id = $1",
-        [parent_id],
-      );
+      const parentOwner = await query("SELECT user_id FROM comments WHERE id = $1", [parent_id]);
       const parentOwnerId = parentOwner.rows[0]?.user_id;
 
       if (parentOwnerId && parentOwnerId !== user_id) {
@@ -138,6 +130,27 @@ const createComment = async (req, res, next) => {
           req.user?.username || null,
           anonymous_id,
         );
+      }
+    }
+
+    // Notificar menciones con @
+    const mentions = extractMentions(content);
+    if (mentions.length > 0) {
+      const mentionedUsers = await query(
+        `SELECT id, username FROM users WHERE username = ANY($1)`,
+        [mentions]
+      );
+      for (const mentionedUser of mentionedUsers.rows) {
+        if (mentionedUser.id !== user_id && mentionedUser.id !== postOwnerId) {
+          await createNotification(
+            'mention',
+            mentionedUser.id,
+            postId,
+            result.rows[0].id,
+            req.user?.username || null,
+            anonymous_id
+          );
+        }
       }
     }
 

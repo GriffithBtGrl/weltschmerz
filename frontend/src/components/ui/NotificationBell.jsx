@@ -71,9 +71,8 @@ const NotificationBell = () => {
                   key={n.id}
                   to={`/post/${n.post_id}`}
                   onClick={() => { readOne(n.id); setOpen(false); }}
-                  className={`block px-4 py-3 border-b border-dark-700 hover:bg-dark-700 transition-colors ${
-                    !n.read ? 'bg-dark-700/50' : ''
-                  }`}
+                  className={`block px-4 py-3 border-b border-dark-700 hover:bg-dark-700 transition-colors ${!n.read ? 'bg-dark-700/50' : ''
+                    }`}
                 >
                   <div className="flex items-start gap-2">
                     {!n.read && (
@@ -89,7 +88,7 @@ const NotificationBell = () => {
                             {' comentó en '}
                             <span className="text-gray-200">{n.post_title}</span>
                           </>
-                        ) : (
+                        ) : n.type === 'reply_to_comment' ? (
                           <>
                             <span className="text-neon-blue">
                               {n.from_username || n.from_anonymous_id?.substring(0, 10) || 'alguien'}
@@ -97,7 +96,15 @@ const NotificationBell = () => {
                             {' respondió tu comentario en '}
                             <span className="text-gray-200">{n.post_title}</span>
                           </>
-                        )}
+                        ) : n.type === 'mention' ? (
+                          <>
+                            <span className="text-neon-blue">
+                              {n.from_username || n.from_anonymous_id?.substring(0, 10) || 'alguien'}
+                            </span>
+                            {' te mencionó en '}
+                            <span className="text-gray-200">{n.post_title}</span>
+                          </>
+                        ) : null}
                       </p>
                       {n.comment_content && (
                         <p className="font-mono text-xs text-gray-600 mt-0.5 truncate">
