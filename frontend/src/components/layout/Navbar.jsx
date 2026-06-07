@@ -20,77 +20,77 @@ const Navbar = () => {
 
   return (
     <nav className="border-b border-dark-700 bg-dark-900/80 backdrop-blur-sm sticky top-0 z-40">      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="font-mono font-bold text-base md:text-lg text-neon-blue hover:text-neon-blue/80 transition-colors">
-          <span className="text-gray-500">&gt;</span> weltschmerz
-          <span className="animate-pulse text-neon-magenta">_</span>
-        </Link>
+      {/* Logo */}
+      <Link to="/" className="font-mono font-bold text-base md:text-lg text-neon-blue hover:text-neon-blue/80 transition-colors">
+        <span className="text-gray-500">&gt;</span> weltschmerz
+        <span className="animate-pulse text-neon-magenta">_</span>
+      </Link>
 
-        {/* Boards desktop */}
-        <div className="hidden md:flex items-center gap-4 font-mono text-xs text-gray-500">
-          {BOARDS.map((board) => (
-            <Link
-              key={board}
-              to={`/?board=${board}`}
-              className="hover:text-neon-blue transition-colors"
-            >
-              /{board}/
-            </Link>
-          ))}
-        </div>
-
-        {/* Auth + hamburguesa */}
-        <div className="flex items-center gap-2">
-          {user ? (
-            <>
-              {user?.role === 'admin' && (
-                <Link to="/admin">
-                  <Badge variant="magenta">admin</Badge>
-                </Link>
-              )}
-              <NotificationBell />
-              <Link to={`/user/${user.username}`} className="flex items-center gap-1.5 group transition-colors">
-                {user.avatar_url ? (
-                  <img src={user.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover border border-dark-600 group-hover:border-neon-blue transition-colors" />
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-dark-700 border border-dark-600 group-hover:border-neon-blue flex items-center justify-center font-mono text-xs text-neon-blue transition-colors">
-                    {user.username[0].toUpperCase()}
-                  </div>
-                )}
-                <span className="font-mono text-xs text-gray-400 group-hover:text-neon-blue transition-colors">
-                  {user.username}
-                </span>
-              </Link>
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
-                salir
-              </Button>
-            </>
-          ) : (
-            <>
-              <Link to="/login">
-                <Button variant="ghost" size="sm">entrar</Button>
-              </Link>
-              <Link to="/register">
-                <Button variant="primary" size="sm">registrarse</Button>
-              </Link>
-            </>
-          )}
-
-          {!user && (
-            <Link to="/anon" className="font-mono text-xs text-gray-600 hover:text-neon-blue transition-colors hidden sm:block">
-              mi actividad
-            </Link>
-          )}
-
-          {/* Hamburguesa solo mobile */}
-          <button
-            className="md:hidden text-gray-400 hover:text-neon-blue transition-colors ml-1"
-            onClick={() => setMenuOpen(!menuOpen)}
+      {/* Boards desktop */}
+      <div className="hidden md:flex items-center gap-4 font-mono text-xs text-gray-500">
+        {BOARDS.map((board) => (
+          <Link
+            key={board}
+            to={`/?board=${board}`}
+            className="hover:text-neon-blue transition-colors"
           >
-            {menuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
+            /{board}/
+          </Link>
+        ))}
       </div>
+
+      {/* Auth + hamburguesa */}
+      <div className="flex items-center gap-2">
+        {user ? (
+          <>
+            {user?.role === 'admin' && (
+              <Link to="/admin">
+                <Badge variant="magenta">admin</Badge>
+              </Link>
+            )}
+            <NotificationBell />
+            <Link to={`/user/${user.username}`} className="flex items-center gap-1.5 group transition-colors">
+              {user.avatar_url ? (
+                <img src={user.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover border border-dark-600 group-hover:border-neon-blue transition-colors" />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-dark-700 border border-dark-600 group-hover:border-neon-blue flex items-center justify-center font-mono text-xs text-neon-blue transition-colors">
+                  {user.username[0].toUpperCase()}
+                </div>
+              )}
+              <span className="font-mono text-xs text-gray-400 group-hover:text-neon-blue transition-colors">
+                {user.username}
+              </span>
+            </Link>
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              salir
+            </Button>
+          </>
+        ) : (
+          <>
+            <Link to="/login">
+              <Button variant="ghost" size="sm">entrar</Button>
+            </Link>
+            <Link to="/register">
+              <Button variant="primary" size="sm">registrarse</Button>
+            </Link>
+          </>
+        )}
+
+        {!user && (
+          <Link to="/anon" className="font-mono text-xs text-gray-600 hover:text-neon-blue transition-colors hidden sm:block">
+            mi actividad
+          </Link>
+        )}
+
+        {/* Hamburguesa solo mobile */}
+        <button
+          className="md:hidden text-gray-400 hover:text-neon-blue transition-colors ml-1"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+      </div>
+    </div>
 
       {/* Menu mobile */}
       {menuOpen && (
@@ -113,6 +113,17 @@ const Navbar = () => {
               </Button>
             </Link>
           </div>
+
+          {!user && (
+            <Link
+              to="/anon"
+              onClick={() => setMenuOpen(false)}
+              className="font-mono text-sm text-gray-400 hover:text-neon-blue transition-colors"
+            >
+              mi actividad
+            </Link>
+          )}
+
         </div>
       )}
     </nav>
