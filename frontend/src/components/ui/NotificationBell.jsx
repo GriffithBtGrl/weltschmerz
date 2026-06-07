@@ -103,6 +103,22 @@ const NotificationBell = () => {
                         {' te mencionó en '}
                         <span className="text-gray-200">{n.post_title}</span>
                       </>
+                    ) : n.type === 'like_post' ? (
+                      <>
+                        <span className="text-neon-blue">
+                          {n.from_username || n.from_anonymous_id?.substring(0, 10) || 'alguien'}
+                        </span>
+                        {' le dio like a tu post '}
+                        <span className="text-gray-200">{n.post_title}</span>
+                      </>
+                    ) : n.type === 'like_comment' ? (
+                      <>
+                        <span className="text-neon-blue">
+                          {n.from_username || n.from_anonymous_id?.substring(0, 10) || 'alguien'}
+                        </span>
+                        {' le dio like a tu comentario en '}
+                        <span className="text-gray-200">{n.post_title}</span>
+                      </>
                     ) : null}
                   </p>
                   {n.comment_content && (
