@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { votesApi } from '../services/api';
 import toast from 'react-hot-toast';
+import MusicEmbed from '../components/ui/MusicEmbed';
 
 const saveScroll = () => sessionStorage.setItem('homeScroll', window.scrollY);
 
@@ -56,6 +57,11 @@ const PostCard = ({ post, onVote }) => {
               alt=""
               className="mt-2 rounded max-h-48 object-cover border border-dark-600"
             />
+          )}
+          {post.music_url && (
+            <div className="mt-2">
+              <MusicEmbed url={post.music_url} />
+            </div>
           )}
         </div>
 

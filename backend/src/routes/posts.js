@@ -17,7 +17,7 @@ router.delete("/:id", requireAuth, deletePost);
 router.patch("/:id", requireAuth, async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, content } = req.body;
+    const { title, content, music_url } = req.body;
 
     const existing = await query("SELECT user_id FROM posts WHERE id = $1", [
       id,
@@ -27,8 +27,8 @@ router.patch("/:id", requireAuth, async (req, res, next) => {
       throw new AppError("No autorizado", 403);
 
     const result = await query(
-      "UPDATE posts SET title = $1, content = $2 WHERE id = $3 RETURNING *",
-      [title, content, id],
+      "UPDATE posts SET title = $1, content = $2, music_url = $3 WHERE id = $4 RETURNING *",
+      [title, content, music_url, id],
     );
     res.json(result.rows[0]);
   } catch (err) {

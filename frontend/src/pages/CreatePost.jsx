@@ -9,7 +9,7 @@ import { uploadApi } from '../services/api';
 import toast from 'react-hot-toast';
 import { ImagePlus, X } from 'lucide-react';
 
-const BOARDS = ['random','anime', 'tech', 'gaming', 'music', 'memes', 'feels', 'art'];
+const BOARDS = ['random', 'anime', 'tech', 'gaming', 'music', 'memes', 'feels', 'art'];
 
 const CreatePost = () => {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
@@ -132,6 +132,21 @@ const CreatePost = () => {
               />
             </label>
           )}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-mono text-gray-400 uppercase tracking-wider">
+            Música (opcional)
+          </label>
+          <input
+            type="url"
+            placeholder="Link de Spotify o YouTube..."
+            className="bg-dark-950 border border-dark-600 text-gray-200 rounded px-3 py-2 font-mono text-sm placeholder-gray-600 focus:outline-none focus:border-neon-blue focus:ring-1 focus:ring-neon-blue/30"
+            {...register('music_url')}
+          />
+          <p className="font-mono text-xs text-gray-700">
+            ej: https://open.spotify.com/track/... o https://youtu.be/...
+          </p>
         </div>
 
         <div className="flex gap-3 justify-end">

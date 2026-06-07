@@ -19,7 +19,7 @@ const getPosts = async (req, res, next) => {
     if (board) {
       queryText = `
         SELECT 
-          p.id, p.title, p.content, p.image_url, p.vote_score, p.upvotes, p.downvotes,
+          p.id, p.title, p.content, p.image_url, p.music_url, p.vote_score, p.upvotes, p.downvotes,
           p.comment_count, p.is_pinned, p.created_at, p.anonymous_id,
           b.slug as board_slug, b.name as board_name,
           u.username, u.avatar_url, u.role,
@@ -35,7 +35,7 @@ const getPosts = async (req, res, next) => {
     } else {
       queryText = `
         SELECT 
-          p.id, p.title, p.content, p.image_url, p.vote_score, p.upvotes, p.downvotes,
+          p.id, p.title, p.content, p.image_url, p.music_url, p.vote_score, p.upvotes, p.downvotes,
           p.comment_count, p.is_pinned, p.created_at, p.anonymous_id,
           b.slug as board_slug, b.name as board_name,
           u.username, u.avatar_url, u.role,
@@ -63,7 +63,7 @@ const getPost = async (req, res, next) => {
 
     const result = await query(
       `SELECT 
-        p.id, p.title, p.content, p.image_url, p.vote_score, p.upvotes, p.downvotes,
+        p.id, p.title, p.content, p.image_url, p.music_url, p.vote_score, p.upvotes, p.downvotes,
         p.comment_count, p.is_pinned, p.created_at, p.anonymous_id,
         b.slug as board_slug, b.name as board_name,
         u.username, u.avatar_url, u.role,
@@ -84,11 +84,11 @@ const getPost = async (req, res, next) => {
 
 const createPost = async (req, res, next) => {
   try {
-    const { title, content, board_slug, image_url, image_public_id } = req.body;
+    const { title, content, board_slug, image_url, image_public_id, music_url } = req.body;
 
     if (!title) throw new AppError("El título es requerido", 400);
-    if (!content && !image_url)
-      throw new AppError("El post necesita contenido o imagen", 400);
+    if (!content && !image_url && !music_url)
+      throw new AppError("El post necesita contenido, imagen o música", 400);
 
     const boardResult = await query("SELECT id FROM boards WHERE slug = $1", [
       board_slug,
@@ -100,8 +100,8 @@ const createPost = async (req, res, next) => {
     const anonymous_id = user_id ? null : generateAnonId(req);
 
     const result = await query(
-      `INSERT INTO posts (board_id, user_id, anonymous_id, title, content, image_url, image_public_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO posts (board_id, user_id, anonymous_id, title, content, image_url, image_public_id, music_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
       [
         board_id,
@@ -111,6 +111,7 @@ const createPost = async (req, res, next) => {
         content,
         image_url,
         image_public_id,
+        music_url,
       ],
     );
 

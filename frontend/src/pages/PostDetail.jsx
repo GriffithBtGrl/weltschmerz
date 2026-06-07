@@ -10,6 +10,7 @@ import useAuthStore from '../store/authStore';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Textarea from '../components/ui/Textarea';
+import MusicEmbed from '../components/ui/MusicEmbed';
 
 const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
   const [replying, setReplying] = useState(false);
@@ -344,6 +345,10 @@ const PostDetail = () => {
 
           {currentPost.image_url && (
             <img src={currentPost.image_url} alt="" className="rounded border border-dark-600 max-w-full" />
+          )}
+
+          {currentPost.music_url && (
+            <MusicEmbed url={currentPost.music_url} />
           )}
 
           {/* Footer */}
