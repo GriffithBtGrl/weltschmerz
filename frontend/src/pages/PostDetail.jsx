@@ -11,6 +11,7 @@ import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Textarea from '../components/ui/Textarea';
 import MusicEmbed from '../components/ui/MusicEmbed';
+import linkify from '../utils/linkify';
 
 const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
   const [replying, setReplying] = useState(false);
@@ -113,7 +114,7 @@ const Comment = ({ comment, postId, onReplyCreated, depth = 0 }) => {
           </div>
         </div>
       ) : (
-        <p className="text-gray-300 text-sm mb-2 whitespace-pre-wrap">{comment.content}</p>
+        <p className="text-gray-300 text-sm mb-2 whitespace-pre-wrap">{linkify(comment.content)}</p>
       )}
 
       <div className="flex items-center gap-3 mb-2">
@@ -338,7 +339,7 @@ const PostDetail = () => {
             <>
               <h1 className="font-mono text-lg text-gray-100">{currentPost.title}</h1>
               {currentPost.content && (
-                <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{currentPost.content}</p>
+                <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{linkify(currentPost.content)}</p>
               )}
             </>
           )}
