@@ -1,6 +1,7 @@
 const { query } = require('../config/db');
 const { AppError } = require('../middleware/errorHandler');
 const { generateAnonId } = require('../utils/generateAnonId');
+const { sendPushToUser } = require('../services/pushService');
 
 const createNotification = async (type, userId, postId, commentId, fromUsername, fromAnonId) => {
   if (!userId) return;
@@ -10,6 +11,19 @@ const createNotification = async (type, userId, postId, commentId, fromUsername,
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [userId, type, postId, commentId, fromUsername || null, fromAnonId || null],
     );
+
+    // Enviar push notification
+    const messages = {
+      like_post: `${fromUsername || "alguien"} le dio like a tu post`,
+      like_comment: `${fromUsername || "alguien"} le dio like a tu comentario`,
+    };
+
+    await sendPushToUser(userId, {
+      title: "weltschmerz",
+      body: messages[type] || "Nueva notificación",
+      icon: "/favicon.svg",
+      url: type === "post" ? `/post/${postId}` : `/post/${postId}#comment-${commentId}`,
+    });
   } catch (err) {
     console.error("Error creando notificación:", err.message);
   }
