@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Camera, ArrowUp, ArrowDown, MessageSquare } from 'lucide-react';
+import { registerPushNotifications, unregisterPushNotifications, isPushEnabled } from '../utils/webPush';
 
 const Profile = () => {
     const { username } = useParams();
@@ -19,12 +20,17 @@ const Profile = () => {
     const [bio, setBio] = useState('');
     const [savingBio, setSavingBio] = useState(false);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const [pushEnabled, setPushEnabled] = useState(false);
 
     const isOwner = authUser?.username === username;
 
     useEffect(() => {
         loadProfile();
     }, [username]);
+
+    useEffect(() => {
+        isPushEnabled().then(setPushEnabled);
+    }, []);
 
     const loadProfile = async () => {
         setLoading(true);
@@ -70,6 +76,19 @@ const Profile = () => {
             toast.error('Error al subir foto');
         } finally {
             setUploadingAvatar(false);
+        }
+    };
+
+    const handleTogglePush = async () => {
+        if (pushEnabled) {
+            await unregisterPushNotifications();
+            setPushEnabled(false);
+            toast.success('Notificaciones desactivadas');
+        } else {
+            const success = await registerPushNotifications();
+            setPushEnabled(success);
+            if (success) toast.success('Notificaciones activadas');
+            else toast.error('No se pudieron activar las notificaciones');
         }
     };
 
@@ -157,8 +176,22 @@ const Profile = () => {
                                         {profile.bio ? 'editar bio' : '+ agregar bio'}
                                     </button>
                                 )}
+
+                                {isOwner && (
+                                    <button
+                                        onClick={handleTogglePush}
+                                        className={`mt-3 flex items-center gap-2 font-mono text-xs px-3 py-1.5 rounded border transition-all ${pushEnabled
+                                                ? 'border-neon-blue text-neon-blue bg-neon-blue/10'
+                                                : 'border-dark-600 text-gray-500 hover:border-neon-blue hover:text-neon-blue'
+                                            }`}
+                                    >
+                                        🔔 {pushEnabled ? 'notificaciones activadas' : 'activar notificaciones'}
+                                    </button>
+                                )}
                             </div>
+
                         )}
+
                     </div>
                 </div>
             </div>
